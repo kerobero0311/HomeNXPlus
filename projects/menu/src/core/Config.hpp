@@ -95,9 +95,9 @@ struct AppConfig {
 
     bool save() const;
 
-    static constexpr const char* kConfigDir  = "sdmc:/config/SwitchU";
-    static constexpr const char* kConfigPath = "sdmc:/config/SwitchU/settings.json";
+    static constexpr const char* kConfigDir  = HNP_CFG_SWITCHU "";
+    static constexpr const char* kConfigPath = HNP_CFG_SWITCHU "/settings.json";
     // The copy that was current before the last save. Read only when the live
     // settings file is missing or does not parse.
-    static constexpr const char* kBackupPath = "sdmc:/config/SwitchU/settings.json.bak";
+    static constexpr const char* kBackupPath = HNP_CFG_SWITCHU "/settings.json.bak";
 };

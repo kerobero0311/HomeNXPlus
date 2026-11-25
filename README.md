@@ -1,165 +1,72 @@
-# HomeNX
+# HomeNX+
 
-A new HOME menu for modded Switch consoles. It has two looks: **CardsNX** shows box-art cards and the
-**Wii U look** shows a grid. Your games, News, Social, Miis, Discord and Sphaira are one button away in both.
-It's free and open source (GPL-3.0).
+Menu HOME personnel pour Nintendo Switch moddée (Atmosphère), en français, avec Claude intégré.
+Version modifiée de [HomeNX](https://github.com/ad3333m/homenx) (ad3333m), elle-même tirée de
+[SwitchU](https://github.com/PoloNX/SwitchU) (PoloNX). Licence **GPL-3.0**. Crédits : `CREDITS.md`.
+Le README d'origine est conservé dans `README_HomeNX.md`.
 
-Website: **[homenx.pages.dev](https://homenx.pages.dev)**
+> État : **en développement** (version 0.9). HomeNX+ se teste en **application** (`.nro`) ;
+> l'installation comme vrai menu HOME remplace HomeNX (sauvegarde et plan de secours d'abord).
 
-![CardsNX on a Switch OLED](screenshots/cardsnx.jpg)
+**In English (short):** HomeNX+ is a French fork of HomeNX for modded Switch consoles (Atmosphère).
+It adds a HomeNX+ panel to the CardsNX look (and a Style button to switch between the CardsNX and
+Wii U looks), per-game notes and completion checklists, performance "scenes" (sys-clk, Fizeau,
+brightness), a safe mode, a Claude client (`ClaudeNX.nro`, Anthropic API, your own key), a Tesla
+overlay, a small PC companion (`pc_agent`, LAN only: Wake-on-LAN, mailbox, save/screenshot backup,
+opening Netflix / Disney+ / Prime Video / Spotify on the PC to watch them through Moonlight), and Linux
+(L4T) helper scripts. Builds natively on Windows (devkitPro + xmake). GPL-3.0, see `CREDITS.md`.
+No keys, firmware, game files or signature patches are included or downloaded.
 
-## Downloads
+## Ce qu'il y a sur la carte SD
 
-Everything is in the [latest release](https://github.com/ad3333m/homenx/releases/tag/latest).
-
-| File | What it is |
+| Chemin | Rôle |
 |---|---|
-| `HomeNX-full.zip` | Replaces the HOME menu. This is the one to install. Needs Atmosphère. |
-| `HomeNX.nro` | The Wii U look as a normal app, opened from Sphaira or hbmenu. It changes nothing. |
-| [`CardsNX.nro`](https://github.com/ad3333m/homenx/releases/tag/cardsnx) | The card look as a normal app. |
-| `NXToggle.nro` | Picks the look, installs updates, and turns HomeNX off and on. HomeNX installs it for you. |
-| `HomeNX-frontend.zip` | The smaller update package that NXToggle downloads. You don't need it by hand. |
+| `switch/HomeNXPlus/HomeNXPlus.nro` | HomeNX+ en application de test (à ouvrir depuis le menu homebrew) |
+| `switch/ClaudeNX/ClaudeNX.nro` | Claude en application autonome |
+| `config/homenxplus/` | réglages : `config.ini`, `api_key.txt` (ta clé, jamais affichée), `cacert.pem` ; `menu/` = réglages du menu HomeNX+ |
+| `homenxplus/` | données : notes, checklists, journaux… |
+| `switchroot/outils/homenxplus/` | scripts Linux (secours…) |
 
-## Installing
+## Utiliser la version de test
+1. Ouvre le menu homebrew (album, ou bouton Homebrew de HomeNX).
+2. Lance **HomeNX+**. Pour en sortir : bouton HOME.
 
-1. You need a Switch running Atmosphère.
-2. Extract `HomeNX-full.zip` to the root of the SD card. It adds the `atmosphere/` and `switch/` folders.
-3. Restart the console. HomeNX is now your HOME menu.
-4. Open **NXToggle** from your homebrew menu. From there you can switch between CardsNX and the Wii U look,
-   check for updates (it downloads and installs them on the console), or turn HomeNX off and on.
+## ClaudeNX (Claude sur la Switch)
+1. Crée une clé API sur console.anthropic.com, avec une limite de dépenses (facturée à part de Claude Pro).
+2. Mets-la, seule, dans `config/homenxplus/api_key.txt` sur la carte.
+3. Lance **ClaudeNX** : **A** pour poser une question, **X** pour changer de modèle (Haiku ↔ Opus), **Y** pour une nouvelle conversation, **B** pour arrêter une réponse, **+** pour quitter.
+4. Les réglages (modèle, plafond mensuel en €…) sont dans `config/homenxplus/config.ini`.
 
-```
-sdmc:/
-├── atmosphere/contents/
-│   └── 0100000000001000/   HomeNX
-├── switch/
-│   ├── NXToggle/           look, updates, on/off
-│   └── CardsNX/            the card look as an app
-└── hbmenu.nro              HomeNX Loader (your old one is kept as hbmenu.nro.homenx-original)
+## Installer depuis le PC (carte dans le lecteur)
+```powershell
+.\outils\installer_sur_sd.ps1
 ```
 
-**If the console stops at a black screen**, put the SD card in a computer and delete
-`atmosphere/contents/0100000000001000`. The normal HOME menu comes back.
-
-## CardsNX
-
-- Your games are big box-art cards on frosted glass, with play time. The pages are Games, Homebrew, Media and
-  Nintendo. Either stick moves through them.
-- Cartridge badges are separate from the running-game indicator, including multi-game cards.
-  Choose no badges (default), inserted-cartridge badges only, or inserted and required-cartridge badges.
-  Independently choose a title bar, temporary first-position placement, both, or neither (default).
-  See [game-card detection and validation](docs/cards-game-card.md).
-- Art comes from SteamGridDB (add your own API key in Settings > Pictures) and GameTDB. Every game's pictures
-  download on their own and stay on the SD card, so the cards don't wait on the internet.
-- **+** on a card lets you:
-  - pick its card picture, background picture or title picture, for games, ports, homebrew and media apps alike
-    (**Y** searches SteamGridDB: type part of a name and pick the game from the results)
-  - rename it
-  - move it to another page (homebrew ports onto Games, for example)
-  - put it on the panel button
-  - delete it
-- **X** asks whether to close the software that's open.
-- **R** opens Quick Settings: music player, volumes, brightness, Airplane mode, Wi-Fi, Bluetooth and power.
-- The **Album** on the Nintendo page shows your screenshots (Atmosphère's Album opens homebrew). Y makes one
-  the background, X puts it on the lock screen.
-- Leaving a game, its last picture shrinks into its card, like Nintendo's HOME.
-- The first time, a short intro shows the buttons.
-- Settings:
-  - **Home**: Ask who's playing (choose the profile when a game starts), the panel button, Look for new software
-  - **Look**: one background picture for everything, the launch animation, TV resolution
-  - **Lock screen**: on or off, a password, a picture
-  - **Sound**: HOME music or **Spotify**
-  - **Console**: sleep, and the date and time
-  - **Pictures**: SteamGridDB, and Save every picture (readable copies in `config/CardsNX/pictures`)
-- **Spotify** shows and controls what plays on your phone, computer or speaker: song, cover, volume.
-  - You sign in by scanning one QR code with your phone on the same Wi-Fi.
-  - The first time, the phone page may ask for a Spotify Client ID: it shows how to make one, and you paste it
-    there.
-  - The Switch doesn't play Spotify's audio itself, and Spotify only lets Premium accounts use the buttons.
-
-## The Wii U look
-
-- Games sit in a grid with folders and widgets (weather, calendar, a now-playing bar).
-- There are ten side buttons, picked and ordered in Settings > HomeNX > Sidebar buttons from 17:
-  - Sphaira, Discord, News and Settings
-  - a custom button (any .nro, with your own icon)
-  - Nintendo eShop, Controllers, Social, Theme Shop and Sleep
-  - Nextendo, Music, Storage, Mii Maker and NXToggle
-  - Reboot to Hekate and Homebrew Manager
-- **R** opens Quick Settings and **L** opens Discord.
-- **Glass effects** can be turned off for a steady 60 FPS.
-- Settings > HomeNX > **Look for new software** reads what's installed again.
-
-## In both looks
-
-- **Discord** is in HOME. Sign in with a QR code or a token. Discord may flag accounts that use third-party
-  clients, so using it is at your own risk.
-- **Achievements**: milestones every game has, from your play time and launches (1, 10, 25, 50 and 100 hours,
-  10 and 50 starts, and some across all your games).
-  - Games with a pack also have their own, like finishing a world. They unlock the moment it happens.
-    Anyone can write a pack: [docs/achievement-packs.md](docs/achievement-packs.md).
-  - With Ultrahand, a notification pops up over the game the moment you earn one.
-  - HOME tells you what's new when you come back. **+** on a game > **Achievements** shows how far along you are.
-  - The **HomeNX Achievements** overlay (in Ultrahand's list) shows them during a game.
-- **News** shows what's saved on your Switch, newest first, with unread dots.
-- **Social** shows your friend list, friend requests, Add Friend and your play history. The **Mii Maker** is built
-  in and shows real Mii faces.
-- **Sphaira** is included. It and any other .nro can open as an application with full memory.
-  - HomeNX borrows an installed game to run it.
-  - **HomeNX Loader** (`sdmc:/hbmenu.nro`) chains to the app you picked.
-- **The lock screen** shows when the console starts or wakes, over HOME frosted or over your own picture.
-  - It can ask for a **password**: 4 to 8 D-pad presses. You make it on the lock screen itself, then press it
-    once more to check.
-  - Forgot it? Delete `config/HomeNX/lock_password` from the SD card on a computer.
-  - Both looks share the password and the picture.
-- **1080p when docked** is a setting. It's off by default and starts the next time HOME opens.
-- Every controller works, not only player 1.
-- **Reboot to Hekate** is in the power menu.
-- Updates install on the console with NXToggle, and HomeNX can be turned off without a PC.
-
-## Building
-
-You need [devkitPro](https://devkitpro.org/wiki/Getting_Started) devkitA64 (CI uses the `devkitpro/devkita64`
-image), [xmake](https://xmake.io) and Python 3.
-
-```bash
-git clone --recursive https://github.com/ad3333m/homenx
-cd homenx
+## Mettre à jour (depuis le PC)
+```powershell
+.\build.ps1 -Variant homebrew              # compile
+.\test.ps1                                 # tests automatiques
+.\deploy.ps1 -Ip <IP de la Switch>         # envoi FTP (activer sys-ftpd avant, le couper après)
 ```
+Sans FTP : carte dans le lecteur de l'Ally, ou mode UMS (Ultrahand > Changer de système > Carte SD sur le PC).
 
-The apps (HomeNX.nro, NXToggle.nro, CardsNX.nro and the rest):
+## Secours (si un menu HOME perso empêche la console de démarrer)
+- **Depuis le PC** (carte dans le lecteur ou en UMS) : `.\secours_menu_home.ps1`
+- **Depuis Kubuntu** : `bash /media/$USER/SWITCH\ SD/switchroot/outils/homenxplus/secours_menu_home.sh`
 
-```bash
-xmake f -p cross -m release -a aarch64 --toolchain=devkita64 --homebrew=y
-xmake
+Les deux renomment `atmosphere/contents/0100000000001000/exefs.nsp` en `exefs.nsp.disabled` : la console
+redémarre avec le menu Nintendo. Ajouter `-Action reactiver` (PC) ou `reactiver` (Linux) pour revenir.
+
+## Désinstaller complètement
+Supprimer `switch/HomeNXPlus/`, `switch/.overlays/HomeNXPlus.ovl`, `homenxplus/` et `config/homenxplus/`.
+Le HomeNX installé n'est pas concerné.
+
+## Compiler (Windows)
+Prérequis : devkitPro dans MSYS2 (`C:\devkitPro\msys64\opt\devkitpro`) avec devkitA64, libnx et les portlibs,
+xmake (portable, `%USERPROFILE%\xmake`), MinGW de MSYS2 (`ucrt64`), Python 3. `outils/env.ps1` règle tout
+pour la session, et `build.ps1` le charge automatiquement.
+```powershell
+.\build.ps1 -Variant homebrew      # .nro de test   -> build\homebrew\cross\aarch64\release\
+.\build.ps1 -NoInstall             # menu HOME + daemon, sans installation
 ```
-
-The HOME menu replacement. The Loader is built into the menu, so build and embed it first:
-
-```bash
-xmake f -p cross -m release -a aarch64 --toolchain=devkita64
-xmake build HomeNX-Loader
-python3 tools/embed_loader.py build/cross/aarch64/release/HomeNX-Loader.nro projects/menu/src/generated/loader_nro.inc
-xmake
-```
-
-The output goes to `build/cross/aarch64/release/`.
-[`.github/workflows/switch.yml`](.github/workflows/switch.yml) does the rest:
-
-- bundles Sphaira
-- builds the achievements overlay (`make -C projects/achievements`)
-- builds CardsNX's GameTDB index
-- packs the SD card layout into the zips
-
-## Credits and legal
-
-- [Cyan](https://github.com/cyanctl) for the HomeNX lock screen and Discord token sign-in
-  ([ad3333m/homenx#5](https://github.com/ad3333m/homenx/pull/5)).
-- The code HomeNX builds on, the apps it includes and their licenses:
-  [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
-- [Terms of use](TERMS.md) and [privacy](PRIVACY.md), also at
-  [homenx.pages.dev/legal](https://homenx.pages.dev/legal/).
-
-## License
-
-GPL-3.0: see [LICENSE](LICENSE). HomeNX is not affiliated with Nintendo. No games are provided.
+Suivi du projet : `PLAN.md`, `DECISIONS.md`, `TESTS_CONSOLE.md`, `VEILLE.md`.

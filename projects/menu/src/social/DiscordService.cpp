@@ -30,7 +30,7 @@ namespace {
 
 // {"current": id, "accounts": [{id, username, global_name, avatar, token}],
 //  "signed_out": [ids]} — the same account shape as SwitchCord's accounts.json.
-constexpr const char* kAccountsPath = "sdmc:/config/SwitchU/discord.json";
+constexpr const char* kAccountsPath = HNP_CFG_SWITCHU "/discord.json";
 constexpr const char* kSwitchCordAccounts = "sdmc:/switch/SwitchCord/accounts.json";
 
 std::string readAll(const char* path) {
@@ -199,7 +199,7 @@ void DiscordService::saveAccounts() const {
     }
     out += "]}\n";
     std::error_code ec;
-    std::filesystem::create_directories("sdmc:/config/SwitchU", ec);
+    std::filesystem::create_directories(HNP_CFG_SWITCHU "", ec);
     std::ofstream(kAccountsPath, std::ios::trunc) << out;
 }
 
@@ -207,7 +207,7 @@ void DiscordService::activate() {
     if (m_stopping) shutdown(); // stopped for a launch that didn't happen: start again
     if (m_started) return;
     m_started = true;
-    Log::Init("sdmc:/config/SwitchU/discord.log");
+    Log::Init(HNP_CFG_SWITCHU "/discord.log");
     // Sockets, nifm and curl: shared with the Theme Shop (initialised once).
     if (!themeshop::http::initialize()) {
         m_state = State::Failed;
@@ -235,7 +235,7 @@ void DiscordService::activate() {
             if (res) freeaddrinfo(res);
         }
         if (lines.empty()) return; // offline: keep the last ones
-        if (FILE* f = std::fopen("sdmc:/config/SwitchU/discord_hosts.txt", "w")) {
+        if (FILE* f = std::fopen(HNP_CFG_SWITCHU "/discord_hosts.txt", "w")) {
             std::fputs(lines.c_str(), f);
             std::fclose(f);
         }
@@ -1054,7 +1054,7 @@ void DiscordService::saveListsForOverlay() {
     }
     out += "]}\n";
     if (out == m_savedLists) return;
-    if (FILE* f = std::fopen("sdmc:/config/SwitchU/discord_lists.json", "w")) {
+    if (FILE* f = std::fopen(HNP_CFG_SWITCHU "/discord_lists.json", "w")) {
         std::fputs(out.c_str(), f);
         std::fclose(f);
         m_savedLists = std::move(out);

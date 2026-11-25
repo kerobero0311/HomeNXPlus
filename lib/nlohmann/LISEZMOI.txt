@@ -1,0 +1,1 @@
+﻿nlohmann/json v3.12.0 (en-tete unique), licence MIT, (c) Niels Lohmann - https://github.com/nlohmann/json. Utilise par l'overlay HomeNX+.

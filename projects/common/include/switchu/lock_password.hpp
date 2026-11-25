@@ -17,7 +17,7 @@
 namespace switchu::lockpw {
 
 inline constexpr const char* kPath = "sdmc:/config/HomeNX/lock_password";
-inline constexpr const char* kOldPin = "sdmc:/config/SwitchU/lock_pin"; // (the 4-digit PIN it replaces)
+inline constexpr const char* kOldPin = HNP_CFG_SWITCHU "/lock_pin"; // (the 4-digit PIN it replaces)
 inline constexpr size_t kMin = 4, kMax = 8;
 
 inline std::string hash(const std::string& presses) {

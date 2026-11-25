@@ -487,13 +487,32 @@ void WiiUMenuApp::createSettings() {
     m_settings->onNextendoApp([this]() { openNextendoAppPicker(); });
     m_settings->onHomePages([this]() { openHomePagesPicker(); });
     m_settings->onDiagnostics([this]() { showDiagnostics(); });
+    m_settings->onLaunchNro([this](const std::string& path) {  // HomeNX+ : ClaudeNX...
+        leaveThen([this, path] { m_launcher.launchNro(path, homebrewHostTitleId(), activeProfileUid()); });
+    });
+    m_settings->onRestartMenu([this]() -> std::string {  // HomeNX+ : bouton Style
+#ifdef SWITCHU_MENU
+        if (m_launcher.suspendedTitleId() != 0)  // le daemon ne relance le menu que si rien n'est ouvert
+            return "Ferme d'abord le jeu ouvert : le menu doit redemarrer.";
+#endif
+        leaveThen([this] {
+#ifdef SWITCHU_HOMEBREW
+            constexpr const char* kSelf = "sdmc:/switch/HomeNXPlus/HomeNXPlus.nro";
+            std::error_code ec;
+            if (envHasNextLoad() && std::filesystem::exists(kSelf, ec))
+                envSetNextLoad(kSelf, "\"sdmc:/switch/HomeNXPlus/HomeNXPlus.nro\"");
+#endif
+            app().requestExit();
+        });
+        return "";
+    });
     m_settings->onFontsChange([this]() { m_fontsChanged = true; });
     m_settings->onPointerModeChange([this](int mode) {
         app().input().setPointerMode(static_cast<nxui::Input::PointerMode>(mode));
     });
     m_settings->onLockPicture([this]() { openLockPicturePicker(); });
     m_settings->onLockPassword([this]() {
-        if (!lockScreenOn()) std::ofstream("sdmc:/config/SwitchU/lock_screen") << "1"; // a password needs the lock screen
+        if (!lockScreenOn()) std::ofstream(HNP_CFG_SWITCHU "/lock_screen") << "1"; // a password needs the lock screen
         showLockScreen(false, true);
     });
 #ifdef SWITCHU_MENU // (the app list is HOME's)
@@ -901,8 +920,8 @@ void WiiUMenuApp::showDiagnostics() {
         body += std::string(i ? ", " : " ") + kWork[i] + " "
                 + std::to_string(std::max(m_workWorst[i], m_workWorstBefore[i]) / 1000);
     for (const char* tag : {"[clock]", "[mii]", "[news]", "[press]", "[text-cache] maintenance done"})
-        for (const std::string& line : logTail("sdmc:/config/SwitchU/menu.log", tag, 2)) body += "\n" + line;
-    const auto overlay = logTail("sdmc:/config/SwitchU/discord_overlay.log", "", 5);
+        for (const std::string& line : logTail(HNP_CFG_SWITCHU "/menu.log", tag, 2)) body += "\n" + line;
+    const auto overlay = logTail(HNP_CFG_SWITCHU "/discord_overlay.log", "", 5);
     body += "\nOverlay:" + std::string(overlay.empty() ? " no log yet (open it with L+ZL in a game)" : "");
     for (const std::string& line : overlay) body += "\n  " + line;
     m_audio.playSfx(Sfx::ModalShow);
@@ -1582,7 +1601,7 @@ void WiiUMenuApp::showDetailScreen(std::vector<ListDetailScreen::Entry> entries,
 // News HomeNX has shown, one news_id per line (the console's own "read" flag
 // isn't written by HomeNX).
 namespace {
-constexpr const char* kNewsReadPath = "sdmc:/config/SwitchU/news_read.txt";
+constexpr const char* kNewsReadPath = HNP_CFG_SWITCHU "/news_read.txt";
 }
 
 std::set<std::string> WiiUMenuApp::readNewsReadList() const {
@@ -1596,7 +1615,7 @@ std::set<std::string> WiiUMenuApp::readNewsReadList() const {
 void WiiUMenuApp::markNewsRead(const std::string& id) {
     if (id.empty()) return;
     std::error_code ec;
-    std::filesystem::create_directories("sdmc:/config/SwitchU", ec);
+    std::filesystem::create_directories(HNP_CFG_SWITCHU "", ec);
     std::ofstream(kNewsReadPath, std::ios::app) << id << '\n';
 }
 
@@ -2089,8 +2108,8 @@ void WiiUMenuApp::checkHomeNXUpdate() {
 void WiiUMenuApp::startHomeNXUpdate() {
     if (!loaderReadyOrExplain()) return;
     std::error_code ec;
-    std::filesystem::create_directories("sdmc:/config/SwitchU/update", ec);
-    std::ofstream("sdmc:/config/SwitchU/update/autostart") << "1";
+    std::filesystem::create_directories(HNP_CFG_SWITCHU "/update", ec);
+    std::ofstream(HNP_CFG_SWITCHU "/update/autostart") << "1";
     leaveThen([this] {
         m_launcher.launchNro("sdmc:/switch/NXToggle/NXToggle.nro",
                              homebrewHostTitleId(), activeProfileUid());

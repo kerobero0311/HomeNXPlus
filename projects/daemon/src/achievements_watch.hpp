@@ -161,7 +161,7 @@ inline void statusPopup(const char* app, bool battery, const std::string& title,
 inline bool statusPopupsAllowed() {
     std::error_code ec;
     return std::filesystem::exists("sdmc:/switch/.overlays/ovlmenu.ovl", ec)
-        && !std::filesystem::exists("sdmc:/config/SwitchU/no_popups", ec);
+        && !std::filesystem::exists(HNP_CFG_SWITCHU "/no_popups", ec);
 }
 
 inline void watchStatus(bool inGame, bool allowed) {

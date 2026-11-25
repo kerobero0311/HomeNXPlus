@@ -588,7 +588,7 @@ void writeFileBinary(const std::string& path, const std::string& data) {
 
 std::string ThemePackageInstaller::destinationRootFor(const std::string& themeId, Mode mode) {
     (void)mode;
-    return "sdmc:/config/SwitchU/themes/" + themeId;
+    return HNP_CFG_SWITCHU "/themes/" + themeId;
 }
 
 ThemePackageInstaller::Result ThemePackageInstaller::run(const std::string& catalogUrl,

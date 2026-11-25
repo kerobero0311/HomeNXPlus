@@ -95,7 +95,7 @@ bool WidgetStore::save(bool durable) const {
         return !durable || switchu::commitSdCard(reason);
     };
     std::error_code ec;
-    std::filesystem::create_directories("sdmc:/config/SwitchU/widgets", ec);
+    std::filesystem::create_directories(HNP_CFG_SWITCHU "/widgets", ec);
     ec.clear();
     std::filesystem::create_directories(kAssetRoot, ec);
 

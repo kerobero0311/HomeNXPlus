@@ -201,7 +201,7 @@ SettingsScreen::Tab settings::tabs::HomeNXTab::build(SettingsScreen& screen) {
     }
     {
         // Same flag the daemon drops when application mode fails on this console.
-        static constexpr const char* kAppletFlag = "sdmc:/switch/SwitchU/homebrew_applet_mode";
+        static constexpr const char* kAppletFlag = HNP_SW_DATA "/homebrew_applet_mode";
         std::error_code ec;
         SettingItem it;
         it.label = i18n.tr("settings.homenx.hb_app", "Sphaira as an application");
@@ -222,7 +222,7 @@ SettingsScreen::Tab settings::tabs::HomeNXTab::build(SettingsScreen& screen) {
     }
     {
         // WiiUMenuApp reads the same flag when a game starts.
-        static constexpr const char* kAskFlag = "sdmc:/config/SwitchU/ask_user";
+        static constexpr const char* kAskFlag = HNP_CFG_SWITCHU "/ask_user";
         std::error_code ec;
         SettingItem it;
         it.label = i18n.tr("settings.homenx.ask_user", "Ask who's playing");
@@ -241,7 +241,7 @@ SettingsScreen::Tab settings::tabs::HomeNXTab::build(SettingsScreen& screen) {
     }
     {
         // WiiUMenuApp::lockScreenOn reads the same flag.
-        static constexpr const char* kLockFlag = "sdmc:/config/SwitchU/lock_screen";
+        static constexpr const char* kLockFlag = HNP_CFG_SWITCHU "/lock_screen";
         std::error_code ec;
         SettingItem it;
         it.label = i18n.tr("settings.homenx.lock", "Lock screen");
@@ -303,7 +303,7 @@ SettingsScreen::Tab settings::tabs::HomeNXTab::build(SettingsScreen& screen) {
     }
     {
         // Read when HOME starts (main.cpp): 1920x1080 when docked.
-        static constexpr const char* kResolution = "sdmc:/config/SwitchU/resolution.txt";
+        static constexpr const char* kResolution = HNP_CFG_SWITCHU "/resolution.txt";
         std::string want;
         std::getline(std::ifstream(kResolution), want);
         SettingItem it;

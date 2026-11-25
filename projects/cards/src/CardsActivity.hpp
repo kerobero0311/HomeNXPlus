@@ -793,6 +793,31 @@ private:
         std::vector<std::string> lines;
     };
     std::vector<LogEntry> m_log;
+    std::string m_logTitle = "Update log", m_logIcon = "sort"; // HomeNX+ : la meme fenetre sert de lecteur de texte
+    // HomeNX+ : un long texte (reponse de Claude, notes, checklist...) dans la fenetre du journal.
+    void openReader(const std::string& title, const std::string& text, const char* glyph = "news");
+#ifdef HNP_PLUS
+    // HomeNX+ (CardsHnp.cpp) : le panneau HomeNX+ dans l'apparence Cartes.
+    void openHnp();                                    // trois points > HomeNX+, Reglages > HomeNX+
+    Section hnpSection();                              // l'onglet HomeNX+ des reglages
+    void openHnpStyle();                               // choisir l'apparence (Cartes / Wii U)
+    void openHnpClaude();
+    void openHnpGame(std::uint64_t id, const std::string& name); // fiche de jeu : notes, checklist, saves
+    void openHnpScenes();
+    void openHnpPc();
+    void hnpSwitchStyle(bool toCards);                 // ecrit frontend.txt et relance le menu
+    // Une tache longue (Claude, PC...) sur un fil a part : le menu ne gele pas.
+    // reader : le resultat s'ouvre dans le lecteur ; sinon un message court.
+    void hnpRun(const std::string& busy, const std::string& title, std::function<std::string()> job, bool reader,
+                std::function<void(const std::string&)> done = {}); // done : sur le fil du menu, a la place du message
+    void openHnpStreaming();                           // Netflix, Disney+, Prime Video, Spotify (PC + Moonlight)
+    void hnpWatch(const std::string& service, const std::string& name);
+    std::function<void(const std::string&)> m_hnpDone;
+    void hnpPoll();
+    std::future<std::string> m_hnpJob;
+    std::string m_hnpJobTitle;
+    bool m_hnpJobReader = false;
+#endif
     // Bluetooth headphones and speakers (13.0.0+), as Nintendo's System Settings has them.
     bool bluetoothAudio(); // btm:sys open (btmsysExit after), else it says why not
     void startAudioScan();

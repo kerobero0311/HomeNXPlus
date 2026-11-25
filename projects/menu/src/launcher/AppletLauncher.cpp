@@ -193,7 +193,7 @@ constexpr const char* kLoaderSources[] = {
     "sdmc:/switch/SwitchU/bin/homenx-loader.nro",
     "sdmc:/switch/HomeNX-Loader/HomeNX-Loader.nro",
 };
-constexpr const char* kLoaderNext = "sdmc:/config/SwitchU/hbl_next.txt";
+constexpr const char* kLoaderNext = HNP_CFG_SWITCHU "/hbl_next.txt";
 
 bool nroNamed(const char* path, const char* name) {
     HomebrewApp app;
@@ -430,7 +430,7 @@ void AppletLauncher::installBundledApps() {
     // HOME or a game started: back to the 4 MB default, once (the overlay does
     // the same). A size chosen in Ultrahand afterwards is left alone.
     constexpr const char* kHeap = "sdmc:/config/nx-ovlloader/heap_size.bin";
-    constexpr const char* kHeapRestored = "sdmc:/config/SwitchU/overlay_heap_restored";
+    constexpr const char* kHeapRestored = HNP_CFG_SWITCHU "/overlay_heap_restored";
     if (!std::filesystem::exists(kHeapRestored, ec)) {
         std::uint64_t size = 0;
         if (std::FILE* f = std::fopen(kHeap, "rb")) {
@@ -538,9 +538,9 @@ static bool startHomebrew(AppletLauncher& self, uint64_t hostTitleId, AccountUid
     std::error_code ec;
     // A fresh session: the Loader ends the process when it's started again in the
     // one it recorded here (the homebrew was closed). See projects/loader.
-    std::filesystem::remove("sdmc:/config/SwitchU/hbl_chained.txt", ec);
+    std::filesystem::remove(HNP_CFG_SWITCHU "/hbl_chained.txt", ec);
     // Tells the daemon not to fall back to the Album if this launch fails.
-    constexpr const char* kApplicationOnly = "sdmc:/config/SwitchU/homebrew_application_only";
+    constexpr const char* kApplicationOnly = HNP_CFG_SWITCHU "/homebrew_application_only";
     if (applicationOnly) {
         if (FILE* f = std::fopen(kApplicationOnly, "w")) std::fclose(f);
     } else {
@@ -549,7 +549,7 @@ static bool startHomebrew(AppletLauncher& self, uint64_t hostTitleId, AccountUid
     // Settings > HomeNX "Sphaira as an application" off. No game to borrow
     // (hostTitleId 0): the daemon finds one itself.
     const bool appletOnly = !applicationOnly
-        && std::filesystem::exists("sdmc:/switch/SwitchU/homebrew_applet_mode", ec);
+        && std::filesystem::exists(HNP_SW_DATA "/homebrew_applet_mode", ec);
     if (!appletOnly && std::filesystem::exists(std::string(kHblDir) + "/main", ec)) {
         const Result rc = switchu::menu::smi_cmd::launchHomebrewApp(uid, hostTitleId);
         DebugLog::log("[launcher] homebrew as application via %016lX rc=0x%X", hostTitleId, rc);
@@ -694,12 +694,12 @@ bool AppletLauncher::prepareHbl() { return false; }
 // HomeNX.nro carries Sphaira in its romfs; copy it to the SD once (an .nro
 // has to be a real file for hbloader), then use the user's own as a fallback.
 bool AppletLauncher::launchSphaira(uint64_t, AccountUid) {
-    const char* bundled = "sdmc:/switch/SwitchU/bin/sphaira.nro";
+    const char* bundled = HNP_SW_DATA "/bin/sphaira.nro";
     std::error_code ec;
     if (std::filesystem::exists("romfs:/bin/sphaira.nro", ec)
         && (!std::filesystem::exists(bundled, ec)
             || std::filesystem::file_size(bundled, ec) != std::filesystem::file_size("romfs:/bin/sphaira.nro", ec))) {
-        std::filesystem::create_directories("sdmc:/switch/SwitchU/bin", ec);
+        std::filesystem::create_directories(HNP_SW_DATA "/bin", ec);
         std::filesystem::copy_file("romfs:/bin/sphaira.nro", bundled,
                                    std::filesystem::copy_options::overwrite_existing, ec);
     }

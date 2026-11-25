@@ -26,7 +26,7 @@ struct LeaveFrameImage {
 
 namespace LeaveFrameCache {
 
-inline constexpr const char* kPath = "sdmc:/config/SwitchU/leave_frame.bin";
+inline constexpr const char* kPath = HNP_CFG_SWITCHU "/leave_frame.bin";
 
 bool save(const LeaveFrameSession& session,
           const std::uint8_t* rgba, int width, int height);

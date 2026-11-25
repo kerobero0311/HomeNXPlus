@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Builds SwitchU with xmake, skipping every step that is already up to date.
 
@@ -66,6 +66,9 @@ param(
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version 3
+
+# HomeNX+ : DEVKITPRO, xmake portable et MinGW (eSpeak) sous Windows
+if (Test-Path (Join-Path $PSScriptRoot 'outils\env.ps1')) { . (Join-Path $PSScriptRoot 'outils\env.ps1') }
 
 $Root = $PSScriptRoot
 $BuildDir = Join-Path $Root "build\$Variant"

@@ -29,16 +29,16 @@ enum class Kind : std::uint8_t {
 
 // The milestones work for every game; each game's own goals (its pack) stay either way.
 // Settings > Achievements turns them off. What was earned is kept.
-inline constexpr const char* kMilestonesOffFlag = "sdmc:/config/SwitchU/achievement_milestones_off";
+inline constexpr const char* kMilestonesOffFlag = HNP_CFG_SWITCHU "/achievement_milestones_off";
 // Each game's own achievements (packs): read from the game's memory through Atmosphère's dmnt.
-inline constexpr const char* kPacksOffFlag = "sdmc:/config/SwitchU/achievement_packs_off";
+inline constexpr const char* kPacksOffFlag = HNP_CFG_SWITCHU "/achievement_packs_off";
 inline bool packsEnabled() {
     std::error_code ec;
     return !std::filesystem::exists(kPacksOffFlag, ec);
 }
 inline void setPacksEnabled(bool enabled) {
     std::error_code ec;
-    std::filesystem::create_directories("sdmc:/config/SwitchU", ec);
+    std::filesystem::create_directories(HNP_CFG_SWITCHU "", ec);
     if (enabled) std::filesystem::remove(kPacksOffFlag, ec);
     else std::ofstream(kPacksOffFlag) << '1';
 }
@@ -48,7 +48,7 @@ inline bool milestonesEnabled() {
 }
 inline void setMilestonesEnabled(bool enabled) {
     std::error_code ec;
-    std::filesystem::create_directories("sdmc:/config/SwitchU", ec);
+    std::filesystem::create_directories(HNP_CFG_SWITCHU "", ec);
     if (enabled) std::filesystem::remove(kMilestonesOffFlag, ec);
     else std::ofstream(kMilestonesOffFlag) << '1';
 }
@@ -115,7 +115,7 @@ inline float progress(const Milestone& m, const Facts& f) {
     return r >= 1.0 ? 1.f : static_cast<float>(r);
 }
 
-inline constexpr const char* kPath = "sdmc:/config/SwitchU/achievements.txt";
+inline constexpr const char* kPath = HNP_CFG_SWITCHU "/achievements.txt";
 
 // What's earned: "<title id> <achievement>" (or "all <achievement>") -> when
 // (POSIX seconds); and the totals HOME saw last (the overlay shows them).
@@ -166,7 +166,7 @@ inline Earned load() {
 // Written whole, through a .tmp renamed into place (the overlay may be reading it).
 inline void save(const Earned& e) {
     std::error_code ec;
-    std::filesystem::create_directories("sdmc:/config/SwitchU", ec);
+    std::filesystem::create_directories(HNP_CFG_SWITCHU "", ec);
     const std::string tmp = std::string(kPath) + ".tmp";
     {
         std::ofstream out(tmp, std::ios::trunc);
@@ -180,7 +180,7 @@ inline void save(const Earned& e) {
 }
 
 // Apps that aren't games (HOME's Media page: YouTube and the like): their time isn't play.
-inline constexpr const char* kSkipPath = "sdmc:/config/SwitchU/achievements_skip.txt";
+inline constexpr const char* kSkipPath = HNP_CFG_SWITCHU "/achievements_skip.txt";
 
 inline std::set<std::uint64_t> loadSkipped() {
     std::set<std::uint64_t> out;
@@ -194,7 +194,7 @@ inline std::set<std::uint64_t> loadSkipped() {
 inline void saveSkipped(const std::set<std::uint64_t>& ids) {
     if (ids == loadSkipped()) return;
     std::error_code ec;
-    std::filesystem::create_directories("sdmc:/config/SwitchU", ec);
+    std::filesystem::create_directories(HNP_CFG_SWITCHU "", ec);
     std::ofstream out(kSkipPath, std::ios::trunc);
     char buf[24];
     for (const std::uint64_t id : ids) {

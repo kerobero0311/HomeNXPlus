@@ -1220,7 +1220,7 @@ struct WeatherJob {
 
 namespace {
 
-constexpr const char* kWeatherCache = "sdmc:/config/SwitchU/weather.json";
+constexpr const char* kWeatherCache = HNP_CFG_SWITCHU "/weather.json";
 
 // Where the console is (from its IP: the Switch has no GPS), then that
 // place's weather from Open-Meteo, in °F where that's what people use.

@@ -33,7 +33,7 @@ extern "C" void userAppExit(void) {
 int main(int, char**) {
     // HomeNX's HOME asks for a Reboot to Hekate this way: Atmosphere sends only
     // some processes' reboots to the payload, and hbl (this) is one of them.
-    if (std::remove("sdmc:/config/SwitchU/cardsnx_reboot_hekate") == 0) {
+    if (std::remove(HNP_CFG_SWITCHU "/cardsnx_reboot_hekate") == 0) {
         std::string error;
         cards::power(cards::Power::Hekate, error); // returns only if it didn't happen
     }

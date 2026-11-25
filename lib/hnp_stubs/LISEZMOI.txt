@@ -1,0 +1,1 @@
+﻿Bibliotheques VIDES (HomeNX+). Elles remplacent les variantes debug libdeko3dd/libnxd/libdrm_nouveaud que le systeme de paquets ajoute parfois a cote des versions normales, ce qui provoquait des erreurs 'multiple definition' a l'edition de liens. Voir DECISIONS.md (D12).

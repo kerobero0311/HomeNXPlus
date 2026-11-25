@@ -14,7 +14,7 @@
 // the picture's path; missing or empty means each look's usual background.
 namespace switchu::lockpicture {
 
-inline constexpr const char* kPath = "sdmc:/config/SwitchU/lock_picture.txt";
+inline constexpr const char* kPath = HNP_CFG_SWITCHU "/lock_picture.txt";
 
 inline std::string get() {
     std::string picture;
@@ -24,12 +24,12 @@ inline std::string get() {
 
 inline void set(const std::string& picture) {
     std::error_code ec;
-    std::filesystem::create_directories("sdmc:/config/SwitchU", ec);
+    std::filesystem::create_directories(HNP_CFG_SWITCHU "", ec);
     std::ofstream(kPath) << picture;
 }
 
-inline constexpr const char* kPlaylistPath = "sdmc:/config/SwitchU/lock_pictures.txt";
-inline constexpr const char* kRotatePath = "sdmc:/config/SwitchU/lock_picture_shuffle";
+inline constexpr const char* kPlaylistPath = HNP_CFG_SWITCHU "/lock_pictures.txt";
+inline constexpr const char* kRotatePath = HNP_CFG_SWITCHU "/lock_picture_shuffle";
 
 inline std::vector<std::string> playlist() {
     std::vector<std::string> pictures;
@@ -44,7 +44,7 @@ inline std::vector<std::string> playlist() {
 
 inline void savePlaylist(const std::vector<std::string>& pictures) {
     std::error_code ec;
-    std::filesystem::create_directories("sdmc:/config/SwitchU", ec);
+    std::filesystem::create_directories(HNP_CFG_SWITCHU "", ec);
     const std::string temporary = std::string(kPlaylistPath) + ".tmp";
     {
         std::ofstream out(temporary, std::ios::trunc);
@@ -66,7 +66,7 @@ inline bool rotationEnabled() {
 
 inline void setRotation(bool enabled) {
     std::error_code ec;
-    std::filesystem::create_directories("sdmc:/config/SwitchU", ec);
+    std::filesystem::create_directories(HNP_CFG_SWITCHU "", ec);
     if (enabled) std::ofstream(kRotatePath) << '1';
     else std::filesystem::remove(kRotatePath, ec);
 }

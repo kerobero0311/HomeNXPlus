@@ -31,7 +31,7 @@ inline constexpr Font kFonts[] = {
 };
 
 inline std::string configPath(const char* which) {
-    return std::string("sdmc:/config/SwitchU/font_") + which + ".txt";
+    return std::string(HNP_CFG_SWITCHU "/font_") + which + ".txt";
 }
 
 inline std::string chosen(const char* which) {

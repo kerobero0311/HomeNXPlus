@@ -4,6 +4,9 @@ add_repositories("switchu-repo .")
 add_repositories("switch-repo https://github.com/PoloNX/switch-repo.git")
 
 includes("toolchain/*.lua")
+
+-- HomeNX+ : bibliotheques debug vides, cherchees en premier (voir lib/hnp_stubs/LISEZMOI.txt)
+add_linkdirs("lib/hnp_stubs")
 add_rules("mode.debug", "mode.release")
 
 local version = "1.2.0"
@@ -13,6 +16,15 @@ local version_define = string.format('SWITCHU_VERSION="%s"', version)
 local homenx_build_define = string.format('HOMENX_BUILD="build %s"', os.getenv("HOMENX_BUILD") or "0")
 
 set_version(version)
+
+-- HomeNX+ : dossiers de données. Le .nro de test (--homebrew=y) range tout à part
+-- (config/homenxplus, switch/HomeNXPlus) pour ne jamais toucher au HomeNX installé.
+-- Le menu HOME installé (phase 12) garde les dossiers d'origine (compatibilité).
+if has_config("homebrew") then
+    add_defines('HNP_CFG_SWITCHU="sdmc:/config/homenxplus/menu"', 'HNP_SW_DATA="sdmc:/switch/HomeNXPlus/data"', 'HNP_CFG_CARDS="sdmc:/config/homenxplus/cards"')
+else
+    add_defines('HNP_CFG_SWITCHU="sdmc:/config/SwitchU"', 'HNP_SW_DATA="sdmc:/switch/SwitchU"', 'HNP_CFG_CARDS="sdmc:/config/CardsNX"')
+end
 
 add_requires("libsdl", "libsdl_mixer", "libsdl_ttf", "zlib", "libwebp", "nlohmann_json", "fmt", "libcurl", "curlpp", {configs = {toolchains = "devkita64"}})
 if get_config("backend") ~= "sdl2" then
@@ -180,6 +192,10 @@ target("SwitchU")
     add_includedirs("projects/common/include", {public = false})
     add_includedirs("projects/menu/src", {public = false})
     add_files("projects/menu/src/**.cpp")
+    -- HomeNX+ : rangement, scenes, Claude (logique) et actions console
+    add_files("projects/homenxplus/src/layout/*.cpp", "projects/homenxplus/src/scenes/*.cpp", "projects/homenxplus/src/claude/*.cpp", "projects/homenxplus/src/safemode/*.cpp", "projects/homenxplus/src/pc/*.cpp", "projects/homenxplus/src/notes/*.cpp", "projects/homenxplus/src/switch/actions.cpp", "projects/homenxplus/src/switch/pc_actions.cpp", "projects/homenxplus/src/switch/games.cpp", "projects/homenxplus/src/switch/claude_tasks.cpp", "projects/homenxplus/src/switch/client.cpp")
+    add_includedirs("projects/homenxplus/include", {public = false})
+    add_defines("HNP_PLUS")  -- HomeNX+ : ajouts dans l'apparence Cartes (CardsActivity)
     -- HomeNX Discord panel: SwitchCord's client code uses yyjson (C) and mbedtls.
     add_files("projects/menu/src/third_party/yyjson.c")
     -- HomeNX: Settings > HomeNX updates the frontend with the Toggle's updater.
@@ -188,7 +204,8 @@ target("SwitchU")
     -- CardsNX as HOME (NXToggle > Home screen): its screen, built in; its files
     -- (fonts, icons, the GameTDB index) ship in switch/SwitchU/cards/.
     add_files("projects/cards/src/Audio.cpp", "projects/cards/src/CardsActivity.cpp", "projects/cards/src/Library.cpp",
-              "projects/cards/src/GameCard.cpp", "projects/cards/src/Mtp.cpp", "projects/cards/src/Spotify.cpp")
+              "projects/cards/src/GameCard.cpp", "projects/cards/src/Mtp.cpp", "projects/cards/src/Spotify.cpp",
+              "projects/cards/src/CardsHnp.cpp")  -- HomeNX+ : panneau, style, fiche de jeu dans l'apparence Cartes
     add_files("projects/updater/src/Catalog.cpp") -- homebrew updates, as the Homebrew Manager finds them
     add_includedirs("projects/cards/src", {public = false})
     add_defines("HOMENX_UPDATER_SHARED_NETWORK", homenx_build_define)
@@ -207,7 +224,9 @@ target("SwitchU")
         add_packages("deko3d", {links = is_mode("debug") and "deko3dd" or "deko3d"})
         add_linkorders(is_mode("debug") and "deko3dd" or "deko3d", "nx")
     end
-    add_syslinks("mbedtls", "mbedx509", "mbedcrypto", "nx")
+    -- HomeNX+ : webpdemux dépend de webp ; sous Windows l'ordre des paquets met
+    -- -lwebp avant -lwebpdemux, donc on relie webp une seconde fois après.
+    add_syslinks("webp", "mbedtls", "mbedx509", "mbedcrypto", "nx")
 
     if is_mode("release") then
         add_cxflags("-O3", "-ffast-math", {force = true})
@@ -259,8 +278,8 @@ target("SwitchU")
 
     if has_config("homebrew") then
         add_defines("SWITCHU_HOMEBREW")
-        set_values("switch.name",    "HomeNX")
-        set_values("switch.author",  "Adam (based on SwitchU by PoloNX)")
+        set_values("switch.name",    "HomeNX+")
+        set_values("switch.author",  "kerob - HomeNX (Adam) / SwitchU (PoloNX)")
         set_values("switch.icon",    "icon.jpg")
         set_values("switch.version", version)
         set_values("switch.romfs",   "romfs")
@@ -439,6 +458,26 @@ target_end()
 
 -- HomeNX Loader: the frontend installs it as sdmc:/hbmenu.nro so the Album's
 -- homebrew loader opens Sphaira, or the .nro picked on the Homebrew page.
+-- HomeNX+ : Claude en application autonome (marche aussi sans HomeNX+).
+target("ClaudeNX")
+    set_kind("binary")
+    if not is_plat("cross") then return end
+
+    set_toolchains("devkita64")
+    set_languages("c++20")
+    add_rules("switch")
+    add_files("projects/claudenx/src/*.cpp", "projects/homenxplus/src/claude/*.cpp", "projects/homenxplus/src/switch/client.cpp")
+    add_includedirs("projects/homenxplus/include")
+    add_packages("nlohmann_json", "libcurl")
+    add_syslinks("mbedtls", "mbedx509", "mbedcrypto", "z", "nx")
+
+    set_values("switch.name",    "ClaudeNX")
+    set_values("switch.author",  "kerob (HomeNX+)")
+    set_values("switch.version", "0.1.0")
+    set_values("switch.icon",    "projects/claudenx/icon.jpg")
+    set_values("switch.format",  "nro")
+target_end()
+
 target("HomeNX-Loader")
     set_kind("binary")
     if not is_plat("cross") then return end
@@ -486,7 +525,7 @@ target("switchu-daemon")
     add_packages("zlib", "nlohmann_json")
     add_linkdirs("lib/Atmosphere-libs/libstratosphere/lib/nintendo_nx_arm64_armv8a/release")
     add_links("stratosphere")
-    add_syslinks("nx")
+    add_syslinks("z", "nx")  -- HomeNX+ : zlib relie directement (le paquet zlib peut etre ignore apres un vidage du cache)
 
     if is_mode("release") then
         add_cxflags("-O3", "-ffast-math", {force = true})

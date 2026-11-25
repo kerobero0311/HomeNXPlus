@@ -8,14 +8,20 @@
 #include <utility>
 #include <vector>
 
+// HomeNX+ : dossier des reglages de CardsNX (xmake.lua). Le .nro de test utilise
+// config/homenxplus/cards pour ne jamais toucher au CardsNX installe.
+#ifndef HNP_CFG_CARDS
+#define HNP_CFG_CARDS "sdmc:/config/CardsNX"
+#endif
+
 namespace cards {
 
 // HOME started CardsNX this many times without it running a moment (see menu/src/main.cpp).
-inline constexpr const char* kCardsStarting = "sdmc:/config/SwitchU/cards_starting";
+inline constexpr const char* kCardsStarting = HNP_CFG_SWITCHU "/cards_starting";
 // After a start that crashed, a safe one: no music, nothing online, plain glass, English, no
 // .nro scan, so what breaks on some consoles can't stop HOME. The file keeps the rest of this
 // boot's starts safe too (one crash each time back from a game would be worse).
-inline constexpr const char* kCardsSafe = "sdmc:/config/SwitchU/cards_safe";
+inline constexpr const char* kCardsSafe = HNP_CFG_SWITCHU "/cards_safe";
 inline bool g_safeStart = false;
 // config/CardsNX/start.log: how far a start got, written at once (a crash loses what
 // perf.log still has in memory). Only at a console start and after a crash.
@@ -25,7 +31,7 @@ void startLogEnd();
 
 // Where CardsNX's own files are (fonts/, icons/, certs/, gametdb.tsv): its
 // romfs as an .nro; HomeNX's install as HOME's frontend.
-#ifdef SWITCHU_MENU
+#if defined(SWITCHU_MENU) || defined(HNP_PLUS)  // HomeNX+ .nro : lit les fichiers du HomeNX installe
 inline constexpr const char* kAssets = "sdmc:/switch/SwitchU/cards/";
 #else
 inline constexpr const char* kAssets = "romfs:/";
@@ -233,7 +239,7 @@ std::vector<TitleChoice> titleChoices(const Game& game, const std::string& key, 
 bool chooseTitleArt(const Game& game, const TitleChoice* choice);
 // Your own pictures: JPG or PNG files put in this folder (up to about 2000 x 2000), first
 // in the card, background and title pictures' choosers.
-inline constexpr const char* kMyPictures = "sdmc:/config/CardsNX/my-pictures";
+inline constexpr const char* kMyPictures = HNP_CFG_CARDS "/my-pictures";
 std::vector<TitleChoice> myPictures(size_t max);
 // + > Card picture: SteamGridDB's covers (600x900) for the game to choose from.
 std::vector<TitleChoice> coverChoices(const Game& game, const std::string& key, size_t max = 15,

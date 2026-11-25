@@ -76,7 +76,7 @@ std::string tr(const char* key, const char* fallback) {
 }
 
 // HOME's look, read by the menu when it starts: "cards" = CardsNX's card row.
-constexpr const char* kHomeStyle = "sdmc:/config/SwitchU/frontend.txt";
+constexpr const char* kHomeStyle = HNP_CFG_SWITCHU "/frontend.txt";
 
 // "HomeNX" in a line about turning HOME on or off, as "CardsNX" when that's the look.
 std::string named(std::string s, bool cards) {
@@ -663,7 +663,7 @@ void ManagerActivity::requestHomeStyle() {
             {toCards ? tr("manager.use_cards", "Use CardsNX as HOME") : tr("manager.use_homenx", "Use HomeNX's HOME"),
              [this, toCards]() {
                  std::error_code ec;
-                 std::filesystem::create_directories("sdmc:/config/SwitchU", ec);
+                 std::filesystem::create_directories(HNP_CFG_SWITCHU "", ec);
                  {
                      std::ofstream out(kHomeStyle, std::ios::trunc);
                      out << (toCards ? "cards" : "homenx") << '\n';
@@ -799,7 +799,7 @@ void ManagerActivity::onUpdate(float dt) {
     syncUpdater();
     if (!m_autoUpdateChecked && !m_loading) {
         m_autoUpdateChecked = true;
-        if (std::remove("sdmc:/config/SwitchU/update/autostart") == 0) {
+        if (std::remove(HNP_CFG_SWITCHU "/update/autostart") == 0) {
             m_autoInstall = true;
             startUpdateCheck();
         }

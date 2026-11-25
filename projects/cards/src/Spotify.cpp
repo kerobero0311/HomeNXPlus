@@ -28,7 +28,7 @@
 namespace cards {
 namespace {
 
-constexpr const char* kFile = "sdmc:/config/CardsNX/spotify.json";
+constexpr const char* kFile = HNP_CFG_CARDS "/spotify.json";
 constexpr const char* kRedirect = "https://homenx.pages.dev/spotify/";
 constexpr const char* kScopes = "user-read-playback-state user-modify-playback-state user-read-currently-playing";
 // A Client ID built in (its owner adds up to 25 people in Spotify's dashboard); else each person's own.

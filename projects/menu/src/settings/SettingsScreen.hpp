@@ -51,6 +51,10 @@ public:
     void onNextendoApp(VoidCb cb) { m_nextendoAppCb = std::move(cb); }
     void onHomePages(VoidCb cb) { m_homePagesCb = std::move(cb); }
     void onDiagnostics(VoidCb cb) { m_diagnosticsCb = std::move(cb); }
+    // HomeNX+ : ouvrir une application .nro (ClaudeNX...) depuis les reglages
+    void onLaunchNro(std::function<void(const std::string&)> cb) { m_launchNroCb = std::move(cb); }
+    // HomeNX+ : relancer le menu (changement d'apparence). Renvoie "" s'il redemarre, sinon pourquoi pas.
+    void onRestartMenu(std::function<std::string()> cb) { m_restartMenuCb = std::move(cb); }
     void onLockPassword(VoidCb cb) { m_lockPasswordCb = std::move(cb); }
     void onLockPasswordOff(VoidCb cb) { m_lockPasswordOffCb = std::move(cb); }
     void onRescanApps(VoidCb cb) { m_rescanCb = std::move(cb); }
@@ -138,6 +142,7 @@ private:
     friend class settings::tabs::StorageTab;
     friend class settings::tabs::AboutTab;
     friend class settings::tabs::HomeNXTab;
+    friend class settings::tabs::HomeNXPlusTab;
 
     BoolCb m_wireframeCb;
     IntCb m_gridColumnsCb;
@@ -166,6 +171,8 @@ private:
     VoidCb m_nextendoAppCb;
     VoidCb m_homePagesCb;
     VoidCb m_diagnosticsCb;
+    std::function<void(const std::string&)> m_launchNroCb;
+    std::function<std::string()> m_restartMenuCb;
     VoidCb m_lockPasswordCb, m_lockPasswordOffCb, m_rescanCb;
     VoidCb m_lockPictureCb;
     VoidCb m_fontsCb;

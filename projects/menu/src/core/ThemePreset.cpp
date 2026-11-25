@@ -674,8 +674,8 @@ const std::vector<ThemePreset>& ThemePreset::builtInPresets() {
     return presets;
 }
 
-static constexpr const char* kUserPresetsPath = "sdmc:/config/SwitchU/theme_presets.ini";
-static constexpr const char* kInstalledThemesDir = "sdmc:/config/SwitchU/themes";
+static constexpr const char* kUserPresetsPath = HNP_CFG_SWITCHU "/theme_presets.ini";
+static constexpr const char* kInstalledThemesDir = HNP_CFG_SWITCHU "/themes";
 
 std::vector<ThemePreset> ThemePreset::loadUserPresets() {
     std::vector<ThemePreset> result;
@@ -777,7 +777,7 @@ bool ThemePreset::saveUserPresets(const std::vector<ThemePreset>& presets) {
     std::error_code ec;
     std::filesystem::create_directory("sdmc:/config", ec);
     ec.clear();
-    std::filesystem::create_directory("sdmc:/config/SwitchU", ec);
+    std::filesystem::create_directory(HNP_CFG_SWITCHU "", ec);
 
     std::ofstream f(kUserPresetsPath, std::ios::trunc);
     if (!f.is_open()) return false;

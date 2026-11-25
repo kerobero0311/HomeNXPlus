@@ -254,9 +254,9 @@ static uint64_t g_catalogHoldNs = 0;
 static constexpr uint64_t kCatalogHoldAfterHomeNs = 6'000'000'000ULL;
 static constexpr uint64_t kCatalogHoldAfterMenuLaunchNs = 3'000'000'000ULL;
 static constexpr uint64_t kCatalogHoldAfterMenuReadyNs = 200'000'000ULL;
-static constexpr const char* kAppCatalogPath = "sdmc:/config/SwitchU/applist.bin";
-static constexpr const char* kAppCatalogTmpPath = "sdmc:/config/SwitchU/applist.tmp";
-static constexpr const char* kAppCatalogBackupPath = "sdmc:/config/SwitchU/applist.bak";
+static constexpr const char* kAppCatalogPath = HNP_CFG_SWITCHU "/applist.bin";
+static constexpr const char* kAppCatalogTmpPath = HNP_CFG_SWITCHU "/applist.tmp";
+static constexpr const char* kAppCatalogBackupPath = HNP_CFG_SWITCHU "/applist.bak";
 static std::mutex g_controlCacheQueueMutex;
 static std::vector<uint64_t> g_controlCacheQueue;
 static std::atomic<bool> g_controlCacheRefreshPending{false};
@@ -431,7 +431,7 @@ static bool writeAppCatalogFile() {
     std::error_code fsEc;
     std::filesystem::create_directory("sdmc:/config", fsEc);
     fsEc.clear();
-    std::filesystem::create_directory("sdmc:/config/SwitchU", fsEc);
+    std::filesystem::create_directory(HNP_CFG_SWITCHU "", fsEc);
 
     std::ofstream f(kAppCatalogTmpPath, std::ios::binary | std::ios::trunc);
     if (!f.is_open()) {
@@ -912,10 +912,10 @@ static Result launchPendingHomeMenu() {
     // Otherwise it closes, and that game isn't left "open".
     std::error_code closeEc;
     std::string frontend;
-    std::getline(std::ifstream("sdmc:/config/SwitchU/frontend.txt"), frontend);
+    std::getline(std::ifstream(HNP_CFG_SWITCHU "/frontend.txt"), frontend);
     const auto mode = g_pendingHomeMenuMode;
     if (mode != smi::MenuStartMode::WakeUp && (frontend.rfind("cards", 0) != 0
-        || std::filesystem::exists("sdmc:/config/SwitchU/homebrew_close_on_home", closeEc)))
+        || std::filesystem::exists(HNP_CFG_SWITCHU "/homebrew_close_on_home", closeEc)))
         closeHomebrewApp("home");
 
     const char* source = g_pendingHomeMenuSource ? g_pendingHomeMenuSource : "home";
@@ -1011,7 +1011,7 @@ static void noteSleep(char what) {
     switchu::timebudget::FullScope time;
     u64 now = 0;
     if (R_FAILED(timeGetCurrentTime(TimeType_UserSystemClock, &now)) || now == 0) return;
-    constexpr const char* kPath = "sdmc:/config/SwitchU/sleep.log";
+    constexpr const char* kPath = HNP_CFG_SWITCHU "/sleep.log";
     std::error_code ec;
     const auto size = std::filesystem::file_size(kPath, ec);
     if (!ec && size > 64 * 1024) std::filesystem::remove(kPath, ec); // (years of sleeps; only recent ones matter much)
@@ -1425,7 +1425,7 @@ static void clearAutoAppletFlag() {
 
 // The menu sets this for homebrew that must run as an application (Nextendo):
 // if that fails, back to HOME, never the Album (applet mode).
-static constexpr const char* kApplicationOnlyFlag = "sdmc:/config/SwitchU/homebrew_application_only";
+static constexpr const char* kApplicationOnlyFlag = HNP_CFG_SWITCHU "/homebrew_application_only";
 
 // Atmosphère starts the homebrew loader in place of the Album unless it was set
 // up otherwise (override_config.ini [hbl_config]: other programs, or a key that

@@ -52,8 +52,8 @@ ArtworkReadStats takeArtworkReadStats() {
 }
 namespace {
 
-constexpr const char* kCacheDir = "sdmc:/config/SwitchU/cards";
-constexpr const char* kSettings = "sdmc:/config/SwitchU/settings.json";
+constexpr const char* kCacheDir = HNP_CFG_SWITCHU "/cards";
+constexpr const char* kSettings = HNP_CFG_SWITCHU "/settings.json";
 constexpr const char* kSteamGridDb = "https://www.steamgriddb.com/api/v2";
 constexpr const char* kNextendo = "https://nextendo.network";
 
@@ -98,7 +98,7 @@ long get(const std::string& url, std::string& out, const std::vector<std::string
     long status = 0;
     CURLcode rc = switchu::tls::perform(c, url, std::string(kAssets) + "certs/", [&out]() { out.clear(); });
     if (rc == CURLE_OK) curl_easy_getinfo(c, CURLINFO_RESPONSE_CODE, &status);
-    else switchu::tls::noteFailure(url, rc, "sdmc:/config/CardsNX/net.log"); // (for the next bug report)
+    else switchu::tls::noteFailure(url, rc, HNP_CFG_CARDS "/net.log"); // (for the next bug report)
     curl_slist_free_all(list);
     return status;
 }
@@ -503,7 +503,7 @@ bool playTotals(AccountUidLike user, std::map<std::uint64_t, PlayTotal>& out, co
     // Asleep isn't play (pdm counts it): the spans the daemon writes in sleep.log come off.
     std::vector<std::pair<std::uint64_t, std::uint64_t>> slept;
     {
-        std::ifstream in("sdmc:/config/SwitchU/sleep.log");
+        std::ifstream in(HNP_CFG_SWITCHU "/sleep.log");
         char what = 0;
         unsigned long long at = 0, from = 0;
         while (in >> what >> at) {
@@ -533,11 +533,11 @@ bool playTotals(AccountUidLike user, std::map<std::uint64_t, PlayTotal>& out, co
     auto finish = [&](bool ok) {
         if (!ok) out.clear();
         std::error_code ec;
-        if (std::filesystem::exists("sdmc:/config/CardsNX/perf.log", ec)) {
+        if (std::filesystem::exists(HNP_CFG_CARDS "/perf.log", ec)) {
             char line[80];
             std::snprintf(line, sizeof(line), "[stats] events=%llu ms=%llu ok=%d\n", static_cast<unsigned long long>(offset),
                           static_cast<unsigned long long>(armTicksToNs(armGetSystemTick() - t0) / 1000000ULL), ok ? 1 : 0);
-            std::ofstream("sdmc:/config/CardsNX/perf.log", std::ios::app) << line;
+            std::ofstream(HNP_CFG_CARDS "/perf.log", std::ios::app) << line;
         }
         return ok;
     };
@@ -679,13 +679,13 @@ void threadDone() {
 }
 
 namespace {
-constexpr const char* kStartLog = "sdmc:/config/CardsNX/start.log";
+constexpr const char* kStartLog = HNP_CFG_CARDS "/start.log";
 std::atomic<bool> g_startLog{false};
 } // namespace
 
 void startLogBegin(bool fresh, const std::string& line) {
     std::error_code ec;
-    std::filesystem::create_directories("sdmc:/config/CardsNX", ec);
+    std::filesystem::create_directories(HNP_CFG_CARDS "", ec);
     if (FILE* f = std::fopen(kStartLog, fresh ? "w" : "a")) {
         std::fprintf(f, "%s\n", line.c_str());
         std::fclose(f);
@@ -731,7 +731,7 @@ void setSteamGridDbKey(const std::string& key) {
 std::string idText(std::uint64_t id) { return hexId(id); }
 
 namespace {
-constexpr const char* kLists = "sdmc:/config/CardsNX/lists.json";
+constexpr const char* kLists = HNP_CFG_CARDS "/lists.json";
 
 nlohmann::json toJson(const std::vector<Game>& list) {
     nlohmann::json a = nlohmann::json::array();
@@ -1077,10 +1077,10 @@ std::string makeBugReport(const std::string& info) {
         std::string data(static_cast<size_t>(std::min(size, most)), '\0');
         if (in.read(data.data(), static_cast<std::streamsize>(data.size()))) files.emplace_back(name, std::move(data));
     };
-    for (const char* log : {"daemon", "menu"}) add(std::string("sdmc:/config/SwitchU/") + log + ".log", std::string(log) + ".log");
+    for (const char* log : {"daemon", "menu"}) add(std::string(HNP_CFG_SWITCHU "/") + log + ".log", std::string(log) + ".log");
     for (const char* log : {"start", "perf", "perf.old", "net"})
-        add(std::string("sdmc:/config/CardsNX/") + log + ".log", std::string("cardsnx-") + log + ".log");
-    add("sdmc:/config/SwitchU/sleep.log", "sleep.log");
+        add(std::string(HNP_CFG_CARDS "/") + log + ".log", std::string("cardsnx-") + log + ".log");
+    add(HNP_CFG_SWITCHU "/sleep.log", "sleep.log");
     for (const std::string& p : newestFiles("sdmc:/atmosphere/crash_reports", 4))
         add(p, "crash_reports/" + std::filesystem::path(p).filename().string());
     for (const std::string& p : newestFiles("sdmc:/atmosphere/fatal_errors", 3))
@@ -1171,7 +1171,7 @@ long sendBugReport(const std::string& zipPath, const std::vector<std::pair<std::
     long status = 0;
     const CURLcode rc = switchu::tls::perform(c, url, std::string(kAssets) + "certs/", [&out]() { out.clear(); });
     if (rc == CURLE_OK) curl_easy_getinfo(c, CURLINFO_RESPONSE_CODE, &status);
-    else switchu::tls::noteFailure(url, rc, "sdmc:/config/CardsNX/net.log");
+    else switchu::tls::noteFailure(url, rc, HNP_CFG_CARDS "/net.log");
     curl_mime_free(form);
     curl_easy_reset(c); // (the form it pointed at is gone)
     return status;
@@ -1245,8 +1245,8 @@ std::string albumPictureFile(const AlbumShot& shot) {
     const std::vector<std::uint8_t> jpeg = albumBytes(shot, false);
     if (jpeg.empty()) return {};
     std::error_code ec;
-    std::filesystem::create_directories("sdmc:/config/CardsNX/backgrounds", ec);
-    const std::string path = "sdmc:/config/CardsNX/backgrounds/" + shot.key + ".jpg";
+    std::filesystem::create_directories(HNP_CFG_CARDS "/backgrounds", ec);
+    const std::string path = HNP_CFG_CARDS "/backgrounds/" + shot.key + ".jpg";
     writeFile(path, std::string(jpeg.begin(), jpeg.end()));
     return path;
 }
@@ -1327,7 +1327,7 @@ std::uint32_t installedVersion(std::uint64_t id) {
 }
 
 namespace {
-constexpr const char* kVersionsPath = "sdmc:/config/CardsNX/versions.txt"; // "<title id> <installed version>"
+constexpr const char* kVersionsPath = HNP_CFG_CARDS "/versions.txt"; // "<title id> <installed version>"
 } // namespace
 
 std::map<std::uint64_t, std::uint32_t> readVersions() {
@@ -1343,7 +1343,7 @@ std::map<std::uint64_t, std::uint32_t> readVersions() {
 
 void writeVersions(const std::map<std::uint64_t, std::uint32_t>& versions) {
     std::error_code ec;
-    std::filesystem::create_directories("sdmc:/config/CardsNX", ec);
+    std::filesystem::create_directories(HNP_CFG_CARDS "", ec);
     std::ofstream out(kVersionsPath, std::ios::trunc);
     char buf[40];
     for (const auto& [id, v] : versions) {
@@ -2035,7 +2035,7 @@ QuickStatus readQuickStatus() {
 std::string sdCardTest(std::atomic<int>& progress, const std::atomic<bool>& stop) {
     constexpr size_t kBig = 64u << 20, kPiece = 1u << 20;
     constexpr int kSmall = 200;
-    const std::string dir = "sdmc:/config/CardsNX/sdtest", big = dir + "/big.bin";
+    const std::string dir = HNP_CFG_CARDS "/sdtest", big = dir + "/big.bin";
     if (FsFileSystem* fs = fsdevGetDeviceFileSystem("sdmc")) {
         s64 free = 0;
         if (R_SUCCEEDED(fsFsGetFreeSpace(fs, "/", &free)) && free < static_cast<s64>(kBig * 2))
@@ -2419,8 +2419,8 @@ bool setBluetooth(bool on) {
             const bool restored = known && !wasAirplane && setAirplaneMode(false);
             bool now = false;
             const bool read = readAirplaneMode(now);
-            if (std::filesystem::exists("sdmc:/config/CardsNX/perf.log")) // only when the log is on
-                std::ofstream("sdmc:/config/CardsNX/perf.log", std::ios::app)
+            if (std::filesystem::exists(HNP_CFG_CARDS "/perf.log")) // only when the log is on
+                std::ofstream(HNP_CFG_CARDS "/perf.log", std::ios::app)
                     << "[bt] off: radio rc=0x" << std::hex << rc << std::dec << " airplane before=" << (known ? int(wasAirplane) : -1)
                     << " restore=" << restored << " after=" << (read ? int(now) : -1) << "\n";
         }

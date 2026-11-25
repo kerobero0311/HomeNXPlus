@@ -64,4 +64,10 @@ public:
     static SettingsScreen::Tab build(SettingsScreen& screen);
 };
 
+// HomeNX+ : Claude, scenes, batterie, rangement
+class HomeNXPlusTab {
+public:
+    static SettingsScreen::Tab build(SettingsScreen& screen);
+};
+
 }

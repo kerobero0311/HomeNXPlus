@@ -186,9 +186,9 @@ inline bool batteryPayloadCharging(uint32_t payload) {
 // A fresh catalog is staged at kAppCatalogTmpPath and swapped in by rename;
 // the previous copy is kept at kAppCatalogBakPath for the duration of the
 // swap so a reader landing in that window still finds a valid catalog.
-static constexpr const char* kAppCatalogPath    = "sdmc:/config/SwitchU/applist.bin";
-static constexpr const char* kAppCatalogTmpPath = "sdmc:/config/SwitchU/applist.tmp";
-static constexpr const char* kAppCatalogBakPath = "sdmc:/config/SwitchU/applist.bak";
+static constexpr const char* kAppCatalogPath    = HNP_CFG_SWITCHU "/applist.bin";
+static constexpr const char* kAppCatalogTmpPath = HNP_CFG_SWITCHU "/applist.tmp";
+static constexpr const char* kAppCatalogBakPath = HNP_CFG_SWITCHU "/applist.bak";
 
 static constexpr uint64_t kMenuTakeoverProgramId = 0x010000000000100DULL;
 static constexpr uint64_t kMenuProcessProgramId  = 0x010000000000FFFFULL;

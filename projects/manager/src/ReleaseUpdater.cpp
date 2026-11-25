@@ -29,10 +29,10 @@ namespace {
 // "HomeNX build <N>" once the frontend zip is uploaded; N is the CI run number.
 constexpr const char* kLatestReleaseUrl =
     "https://api.github.com/repos/ad3333m/homenx/releases/tags/latest";
-constexpr const char* kWorkRoot = "sdmc:/config/SwitchU/update";
-constexpr const char* kArchivePath = "sdmc:/config/SwitchU/update/SwitchU-update.zip";
-constexpr const char* kArchivePartPath = "sdmc:/config/SwitchU/update/SwitchU-update.zip.part";
-constexpr const char* kStagingRoot = "sdmc:/config/SwitchU/update/staging";
+constexpr const char* kWorkRoot = HNP_CFG_SWITCHU "/update";
+constexpr const char* kArchivePath = HNP_CFG_SWITCHU "/update/SwitchU-update.zip";
+constexpr const char* kArchivePartPath = HNP_CFG_SWITCHU "/update/SwitchU-update.zip.part";
+constexpr const char* kStagingRoot = HNP_CFG_SWITCHU "/update/staging";
 constexpr std::uint64_t kMaxArchiveBytes = 256ULL * 1024ULL * 1024ULL;
 constexpr std::uint64_t kMaxExtractedBytes = 512ULL * 1024ULL * 1024ULL;
 
@@ -247,7 +247,7 @@ std::string hexDigest(const std::array<std::uint8_t, SHA256_HASH_SIZE>& digest) 
 
 // HomeNX: what a partial download in kArchivePartPath belongs to ("<size> <sha256>"),
 // so a later run can continue it instead of starting over.
-constexpr const char* kPartInfoPath = "sdmc:/config/SwitchU/update/SwitchU-update.zip.part.info";
+constexpr const char* kPartInfoPath = HNP_CFG_SWITCHU "/update/SwitchU-update.zip.part.info";
 
 std::string partKey(const ReleaseInfo& release) {
     return std::to_string(release.downloadSize) + " " + lower(release.sha256);
@@ -510,7 +510,7 @@ void rollback(std::vector<Replacement>& replacements) {
 // .nro, a font the menu is reading) are parked next to the original as
 // <file>.homenx-pending and listed here; ReleaseUpdater::applyPending() swaps
 // them in when HomeNX next starts, before it opens anything.
-constexpr const char* kPendingList = "sdmc:/config/SwitchU/update/pending.txt";
+constexpr const char* kPendingList = HNP_CFG_SWITCHU "/update/pending.txt";
 constexpr const char* kPendingSuffix = ".homenx-pending";
 
 bool sameContents(const std::filesystem::path& a, const std::filesystem::path& b) {
@@ -673,6 +673,14 @@ void installFiles(const std::vector<std::string>& files,
 } // namespace
 
 ReleaseInfo ReleaseUpdater::checkLatest() {
+#ifdef HNP_PLUS
+    // HomeNX+ : les mises a jour de HomeNX (ad3333m) remplaceraient ce menu par l'original.
+    // HomeNX+ se met a jour depuis le PC (outils/installer_sur_sd.ps1), jamais tout seul.
+    ReleaseInfo none;
+    none.version = installedVersion();
+    none.name = "HomeNX+ : mises a jour depuis le PC";
+    return none;
+#endif
     std::lock_guard<std::mutex> lock(g_networkMutex);
     const std::string response = getTextLocked(kLatestReleaseUrl);
     const auto json = nlohmann::json::parse(response);
@@ -722,6 +730,11 @@ UpdateInstallResult ReleaseUpdater::install(const ReleaseInfo& release,
                                             std::atomic<int>& stage) {
     UpdateInstallResult result;
     result.version = release.version;
+#ifdef HNP_PLUS
+    (void)preserveDisabledOverride; (void)downloadProgress; (void)installProgress; (void)stage;
+    result.error = "HomeNX+ : la mise a jour automatique de HomeNX est desactivee (elle remplacerait HomeNX+).";
+    return result;
+#endif
     try {
         {
             std::lock_guard<std::mutex> lock(g_networkMutex);
@@ -769,6 +782,9 @@ std::string ReleaseUpdater::installedVersion() {
 }
 
 void ReleaseUpdater::applyPending() {
+#ifdef HNP_PLUS
+    return;  // HomeNX+ : aucune mise a jour de HomeNX ne s'applique par-dessus
+#endif
     std::ifstream in(kPendingList);
     if (!in) return;
     std::vector<std::string> keep;

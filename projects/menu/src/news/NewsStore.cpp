@@ -197,7 +197,7 @@ std::vector<NewsArticle> loadNewsArticles(Result& rc, int maxArticles, NewsLoadS
 }
 
 void requestNewsUpdate(int minIntervalSec) {
-    constexpr const char* kStamp = "sdmc:/config/SwitchU/news_requested.txt";
+    constexpr const char* kStamp = HNP_CFG_SWITCHU "/news_requested.txt";
     const long long now = static_cast<long long>(std::time(nullptr));
     long long last = 0;
     {

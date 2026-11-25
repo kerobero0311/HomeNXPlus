@@ -1,4 +1,6 @@
 
+#include "hnp/safemode.hpp"
+#include <thread>
 #include "core/WiiUMenuApp.hpp"
 #include "core/DebugLog.hpp"
 #include "core/Config.hpp"
@@ -6,8 +8,10 @@
 #include <nxui/Application.hpp>
 #include <nxui/core/GpuDevice.hpp>
 #include <fmt/format.h>
+#include "CardsActivity.hpp"  // HomeNX+ : aussi dans le .nro de test (apparence Cartes)
+#include <fstream>
+#include <string>
 #ifdef SWITCHU_MENU
-#include "CardsActivity.hpp"
 #include <nxui/core/Renderer.hpp>
 #include <switchu/smi_protocol.hpp>
 #include <switchu/file_log.hpp>
@@ -118,10 +122,14 @@ extern "C" void userAppInit(void) {
     psmInitialize();
     lblInitialize();
     nsInitialize();
+    pdmqryInitialize();                      // HomeNX+ : temps de jeu de l'apparence Cartes
+    nifmInitialize(NifmServiceType_User);    // HomeNX+ : etat du reseau (Cartes)
     romfsInit();
 }
 
 extern "C" void userAppExit(void) {
+    nifmExit();
+    pdmqryExit();
     nsExit();
     lblExit();
     psmExit();
@@ -224,8 +232,8 @@ extern "C" void __appExit(void) {
 // docked; handheld and otherwise 1280x720). A 1080p start that never put a frame
 // on screen (its marker is still there next time) falls back to 720p and turns
 // the setting off, so HOME can't stay black.
-static constexpr const char* kResolutionFile = "sdmc:/config/SwitchU/resolution.txt";
-static constexpr const char* kResolutionTry = "sdmc:/config/SwitchU/resolution.try";
+static constexpr const char* kResolutionFile = HNP_CFG_SWITCHU "/resolution.txt";
+static constexpr const char* kResolutionTry = HNP_CFG_SWITCHU "/resolution.try";
 
 static void chooseResolution() {
     std::string want;
@@ -336,6 +344,11 @@ int main(int argc, char* argv[]) {
     if (TTF_Init() < 0)
         DebugLog::log("[main] TTF_Init FAILED: %s", TTF_GetError());
 
+    // HomeNX+ : mode sans echec apres 3 demarrages rates de suite
+    hnp::g_safeMode = hnp::isSafe(hnp::beginStart(HNP_CFG_SWITCHU "/hnp_starts"));
+    if (hnp::g_safeMode) DebugLog::log("[hnp] MODE SANS ECHEC (%d demarrages rates)", hnp::g_failedStarts);
+    std::thread([] { svcSleepThread(30'000'000'000LL); hnp::markHealthy(HNP_CFG_SWITCHU "/hnp_starts"); }).detach();
+
     DebugLog::log("[main] creating app...");
     {
         nxui::Application app;
@@ -347,7 +360,13 @@ int main(int argc, char* argv[]) {
         };
         AppConfig startupConfig;
         startupConfig.load();
-        if (startupConfig.tutorialCompleted)
+        // HomeNX+ : le .nro de test ouvre l'apparence choisie (config/homenxplus/menu/frontend.txt),
+        // Cartes par defaut (comme le menu HOME de tous les jours). Bouton Style pour changer.
+        std::string homeStyle;
+        std::getline(std::ifstream(HNP_CFG_SWITCHU "/frontend.txt"), homeStyle);
+        if (homeStyle.empty() || homeStyle.rfind("cards", 0) == 0)
+            app.setActivity(std::make_unique<cards::CardsActivity>());
+        else if (startupConfig.tutorialCompleted)
             app.setActivity(makeMenuActivity(false));
         else
             app.setActivity(std::make_unique<TutorialActivity>(makeMenuActivity));
@@ -376,7 +395,7 @@ int main(int argc, char* argv[]) {
         startupConfig.load();
         // NXToggle's Home screen choice: CardsNX's card row instead of HomeNX's.
         std::string homeStyle;
-        std::getline(std::ifstream("sdmc:/config/SwitchU/frontend.txt"), homeStyle);
+        std::getline(std::ifstream(HNP_CFG_SWITCHU "/frontend.txt"), homeStyle);
         // A CardsNX start that crashes is followed by a safe one; if that crashes too, HomeNX's
         // HOME until the console restarts, not a black screen that flickers for ever.
         // (The count is cleared once CardsNX has run a moment.)
@@ -436,6 +455,7 @@ int main(int argc, char* argv[]) {
 #endif
     }
 
+    hnp::markHealthy(HNP_CFG_SWITCHU "/hnp_starts");  // HomeNX+ : sortie propre
     TTF_Quit();
     SDL_Quit();
 #ifdef SWITCHU_HOMEBREW

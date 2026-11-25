@@ -76,10 +76,10 @@ WidgetSize validatedSize(WidgetType type, WidgetSize requested, AppLayoutMode la
 
 class WidgetStore final {
 public:
-    static constexpr const char* kPath = "sdmc:/config/SwitchU/widgets/widgets.json";
-    static constexpr const char* kTempPath = "sdmc:/config/SwitchU/widgets/widgets.tmp";
-    static constexpr const char* kBackupPath = "sdmc:/config/SwitchU/widgets/widgets.bak";
-    static constexpr const char* kAssetRoot = "sdmc:/config/SwitchU/widgets/assets";
+    static constexpr const char* kPath = HNP_CFG_SWITCHU "/widgets/widgets.json";
+    static constexpr const char* kTempPath = HNP_CFG_SWITCHU "/widgets/widgets.tmp";
+    static constexpr const char* kBackupPath = HNP_CFG_SWITCHU "/widgets/widgets.bak";
+    static constexpr const char* kAssetRoot = HNP_CFG_SWITCHU "/widgets/assets";
 
     bool load();
     bool save(bool durable = true) const;

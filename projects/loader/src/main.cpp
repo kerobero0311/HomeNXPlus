@@ -12,8 +12,8 @@
 
 namespace {
 
-constexpr const char* kNext = "sdmc:/config/SwitchU/hbl_next.txt";        // one-shot request
-constexpr const char* kSphairaPath = "sdmc:/config/SwitchU/sphaira_path.txt";
+constexpr const char* kNext = HNP_CFG_SWITCHU "/hbl_next.txt";        // one-shot request
+constexpr const char* kSphairaPath = HNP_CFG_SWITCHU "/sphaira_path.txt";
 constexpr const char* kOriginal = "sdmc:/hbmenu.nro.homenx-original";
 constexpr const char* kHbmenu = "sdmc:/hbmenu.nro";
 constexpr const char* kBundledSphaira = "sdmc:/switch/SwitchU/bin/sphaira.nro"; // ships with HomeNX
@@ -21,7 +21,7 @@ constexpr const char* kBundledSphaira = "sdmc:/switch/SwitchU/bin/sphaira.nro"; 
 // whenever the .nro we chose exits, so seeing our own process id here means the
 // user left it: end the process (closes the game it borrowed) instead of opening
 // Sphaira again forever. HomeNX deletes this before every launch.
-constexpr const char* kChained = "sdmc:/config/SwitchU/hbl_chained.txt";
+constexpr const char* kChained = HNP_CFG_SWITCHU "/hbl_chained.txt";
 
 bool exists(const std::string& path) {
     struct stat st;

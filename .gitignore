@@ -22,3 +22,11 @@ compile_commands.json
 romfs/bin/sphaira.nro
 projects/menu/src/generated/
 *.ovl
+
+# HomeNX+ : jamais de cle API ni d'environnement Python dans git
+api_key.txt
+**/api_key.txt
+.venv/
+__pycache__/
+
+projects/overlay/build/

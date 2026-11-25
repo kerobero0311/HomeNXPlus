@@ -57,7 +57,8 @@ bool readHomebrew(const std::string& path, HomebrewApp& app, bool withIcon) {
             NacpLanguageEntry* entry = nullptr;
             if (R_FAILED(nacpGetLanguageEntry(nacp.get(), &entry)) || !entry || !entry->name[0]) {
                 entry = nullptr;
-                for (auto& lang : nacp->lang)
+                // libnx >= 4.12 : les titres sont dans lang_data (format 21.0.0+)
+                for (auto& lang : nacp->lang_data.lang)
                     if (lang.name[0]) { entry = &lang; break; }
             }
             if (entry) {

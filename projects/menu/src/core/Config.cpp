@@ -11,8 +11,8 @@
 
 namespace {
 
-static constexpr const char* kLegacyConfigPath = "sdmc:/config/SwitchU/config.json";
-static constexpr const char* kLegacyBackupPath = "sdmc:/config/SwitchU/config.json.bak";
+static constexpr const char* kLegacyConfigPath = HNP_CFG_SWITCHU "/config.json";
+static constexpr const char* kLegacyBackupPath = HNP_CFG_SWITCHU "/config.json.bak";
 std::mutex g_configSaveMutex;
 
 template <typename T>

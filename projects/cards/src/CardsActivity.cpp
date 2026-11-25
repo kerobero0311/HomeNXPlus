@@ -437,7 +437,7 @@ std::string clockText(float seconds) {
 }
 
 #ifdef SWITCHU_MENU
-constexpr const char* kNewsReadPath = "sdmc:/config/SwitchU/news_read.txt"; // shared with HomeNX's HOME
+constexpr const char* kNewsReadPath = HNP_CFG_SWITCHU "/news_read.txt"; // shared with HomeNX's HOME
 #endif
 
 } // namespace
@@ -552,9 +552,9 @@ bool CardsActivity::onCreate() {
     m_clock24 = m_settings.clock24;
     if (m_settings.perfLog) { // a new part of the log (the last one kept as perf.old.log once it's big)
         std::error_code ec;
-        if (std::filesystem::file_size("sdmc:/config/CardsNX/perf.log", ec) > (512u << 10) && !ec) {
-            std::filesystem::remove("sdmc:/config/CardsNX/perf.old.log", ec);
-            std::filesystem::rename("sdmc:/config/CardsNX/perf.log", "sdmc:/config/CardsNX/perf.old.log", ec);
+        if (std::filesystem::file_size(HNP_CFG_CARDS "/perf.log", ec) > (512u << 10) && !ec) {
+            std::filesystem::remove(HNP_CFG_CARDS "/perf.old.log", ec);
+            std::filesystem::rename(HNP_CFG_CARDS "/perf.log", HNP_CFG_CARDS "/perf.old.log", ec);
         }
         char head[96];
         std::snprintf(head, sizeof(head), "=== CardsNX %s %s ===", HOMENX_BUILD,
@@ -896,8 +896,8 @@ void CardsActivity::onDestroy() {
     if (m_nroUpdateJob.valid()) m_nroUpdateJob.wait();
     if (!m_perfOut.empty()) {
         std::error_code ec;
-        std::filesystem::create_directories("sdmc:/config/CardsNX", ec);
-        std::ofstream("sdmc:/config/CardsNX/perf.log", std::ios::app) << m_perfOut;
+        std::filesystem::create_directories(HNP_CFG_CARDS "", ec);
+        std::ofstream(HNP_CFG_CARDS "/perf.log", std::ios::app) << m_perfOut;
     }
     if (m_deleteJob.valid()) m_deleteJob.wait();
     m_saveAllStop = true;
@@ -1133,8 +1133,8 @@ void CardsActivity::worker(int index) {
             for (const auto& n : notify) notifications::add(n[0].c_str(), n[1], n[2]);
             if (!out.empty()) {
                 std::error_code ec;
-                std::filesystem::create_directories("sdmc:/config/CardsNX", ec);
-                std::ofstream("sdmc:/config/CardsNX/perf.log", std::ios::app) << out;
+                std::filesystem::create_directories(HNP_CFG_CARDS "", ec);
+                std::ofstream(HNP_CFG_CARDS "/perf.log", std::ios::app) << out;
             }
         }
         if (index == 1 && !asleep && now >= statusAt) {
@@ -2433,14 +2433,14 @@ void CardsActivity::askCloseFirst(std::uint64_t open, const std::string& title, 
 // The daemon closes homebrew on HOME only while this file is there (Settings >
 // Home > Keep homebrew open is off).
 void CardsActivity::syncPopupsFlag() { // (the daemon's, during a game)
-    constexpr const char* kFlag = "sdmc:/config/SwitchU/no_popups";
+    constexpr const char* kFlag = HNP_CFG_SWITCHU "/no_popups";
     std::error_code ec;
     if (m_settings.notificationCards) std::filesystem::remove(kFlag, ec);
     else std::ofstream(kFlag) << "1";
 }
 
 void CardsActivity::syncHomebrewFlag() {
-    constexpr const char* kFlag = "sdmc:/config/SwitchU/homebrew_close_on_home";
+    constexpr const char* kFlag = HNP_CFG_SWITCHU "/homebrew_close_on_home";
     std::error_code ec;
     if (m_settings.keepHomebrew) std::filesystem::remove(kFlag, ec);
     else std::ofstream(kFlag) << "1";
@@ -2731,7 +2731,7 @@ void CardsActivity::openNintendo(const Game& g) {
 // ---------------------------------------------------------------- homebrew updates
 
 namespace {
-constexpr const char* kUpdatesPath = "sdmc:/config/CardsNX/updates.json";
+constexpr const char* kUpdatesPath = HNP_CFG_CARDS "/updates.json";
 
 // HomeNX's own apps come with HomeNX's updates.
 bool homenxOwn(const std::string& path) {
@@ -3232,8 +3232,8 @@ constexpr int kGalleryPage = 12; // the grids: pictures a page
 std::vector<std::string> ownPictures() {
     std::vector<std::string> own;
     std::error_code ec;
-    std::filesystem::create_directories("sdmc:/config/CardsNX/backgrounds", ec);
-    for (const char* dir : {"sdmc:/config/CardsNX/backgrounds", "sdmc:/switch/SwitchU/lockscreen"})
+    std::filesystem::create_directories(HNP_CFG_CARDS "/backgrounds", ec);
+    for (const char* dir : {HNP_CFG_CARDS "/backgrounds", "sdmc:/switch/SwitchU/lockscreen"})
         for (const auto& e : std::filesystem::directory_iterator(dir, ec)) {
             const std::string ext = lower(e.path().extension().string());
             if (e.is_regular_file(ec) && (ext == ".jpg" || ext == ".jpeg" || ext == ".png")) own.push_back(e.path().string());
@@ -3792,6 +3792,12 @@ void CardsActivity::openOptions() {
         items.push_back(action("Rename", [this, g]() { renameCard(g); }));
         items.back().glyph = "tag";
     }
+#ifdef HNP_PLUS
+    if (game && g.action.empty()) { // HomeNX+ : notes, checklist, Claude, saves de ce jeu
+        items.push_back(action("Fiche HomeNX+ (notes, checklist, Claude)", [this, g]() { openHnpGame(g.id, g.name); }));
+        items.back().glyph = "trophy";
+    }
+#endif
 #ifdef SWITCHU_MENU
     if (g.action != "get" && m_settings.panelApp != idText(g.id)) {
         items.push_back(action("Put on the panel button", [this, g]() {
@@ -4756,10 +4762,10 @@ std::vector<CardsActivity::MenuItem> CardsActivity::powerItems() {
         const char* cards = "sdmc:/switch/CardsNX/CardsNX.nro";
         if (std::filesystem::exists(cards, ec) && AppletLauncher::canRebootToPayload()
             && !AppletLauncher::hekatePayload().empty()) {
-            std::ofstream("sdmc:/config/SwitchU/cardsnx_reboot_hekate") << "1";
+            std::ofstream(HNP_CFG_SWITCHU "/cardsnx_reboot_hekate") << "1";
             leave(-1, 0.4f, [this, cards]() {
                 if (!m_launcher.launchNro(cards, hostTitleId(), launchUid())) {
-                    std::remove("sdmc:/config/SwitchU/cardsnx_reboot_hekate");
+                    std::remove(HNP_CFG_SWITCHU "/cardsnx_reboot_hekate");
                     comeBack();
                     say("Hekate didn't start.");
                 }
@@ -4831,6 +4837,11 @@ void CardsActivity::openDots() {
     m_dotsTiles.push_back({"Quick", "sun", nxui::Color(1.f, 0.78f, 0.25f, 1.f), [this]() { openQuick(); }});
     m_dotsTiles.push_back({"Updates", "sort", nxui::Color(0.25f, 0.8f, 0.5f, 1.f), [this]() { openHomebrewUpdates(); }});
     m_dotsTiles.push_back({"Settings", "gear", nxui::Color(0.55f, 0.6f, 0.68f, 1.f), [this]() { openSettings(); }});
+#ifdef HNP_PLUS
+    m_dotsTiles.push_back({"HomeNX+", "trophy", nxui::Color(0.85f, 0.45f, 1.f, 1.f), [this]() { openHnp(); }});
+    m_dotsTiles.push_back({"Style", "copy", nxui::Color(0.3f, 0.85f, 0.85f, 1.f), [this]() { m_dotsOpen = false; openHnpStyle(); }});
+    m_dotsTiles.push_back({"Films", "play", nxui::Color(0.9f, 0.1f, 0.15f, 1.f), [this]() { m_dotsOpen = false; openHnpStreaming(); }});
+#endif
     m_dotsTiles.push_back({"Power", "power", nxui::Color(1.f, 0.36f, 0.36f, 1.f), [this]() { openPower(); }});
 #ifndef SWITCHU_MENU
     m_dotsTiles.push_back({"Close", "home", nxui::Color(0.5f, 0.55f, 0.62f, 1.f), [this]() {
@@ -6029,15 +6040,15 @@ void CardsActivity::buildSettings() {
 #ifdef SWITCHU_MENU
     { // Read when HOME starts (HomeNX's main.cpp): 1920x1080 when docked.
         std::string want;
-        std::getline(std::ifstream("sdmc:/config/SwitchU/resolution.txt"), want);
+        std::getline(std::ifstream(HNP_CFG_SWITCHU "/resolution.txt"), want);
         m_tv1080 = want.rfind("1080", 0) == 0;
     }
     look.rows.push_back(choice("TV resolution", [this]() { return std::string(m_tv1080 ? "1080p" : "720p"); },
         [this](int) {
             m_tv1080 = !m_tv1080;
             std::error_code ec;
-            if (m_tv1080) std::ofstream("sdmc:/config/SwitchU/resolution.txt") << "1080";
-            else std::filesystem::remove("sdmc:/config/SwitchU/resolution.txt", ec);
+            if (m_tv1080) std::ofstream(HNP_CFG_SWITCHU "/resolution.txt") << "1080";
+            else std::filesystem::remove(HNP_CFG_SWITCHU "/resolution.txt", ec);
             say(m_tv1080 ? "1080p on the TV from the next time HOME opens (handheld stays 720p)."
                          : "720p from the next time HOME opens.");
         }, "Sharper on a TV; 720p is lighter for the console"));
@@ -6528,6 +6539,9 @@ void CardsActivity::buildSettings() {
     }));
 #endif
     m_sheet.push_back(std::move(about));
+#ifdef HNP_PLUS
+    m_sheet.push_back(hnpSection()); // HomeNX+ : son onglet (Claude, scenes, PC, style)
+#endif
     // Fewer tabs: these go at the end of another's rows.
     auto heading = [](const char* name) {
         MenuItem row;
@@ -6579,6 +6593,7 @@ void CardsActivity::buildSettings() {
     const auto& wanted = m_settings.sheetOrder;
     auto rank = [&wanted](const Section& sec) {
         const auto it = std::find(wanted.begin(), wanted.end(), sec.name);
+        if (it == wanted.end() && sec.name == "HomeNX+") return -1; // HomeNX+ : en premier tant qu'il n'a pas ete range
         return it == wanted.end() ? 1000 : static_cast<int>(it - wanted.begin());
     };
     std::stable_sort(m_sheet.begin(), m_sheet.end(), [&rank](const Section& x, const Section& y) { return rank(x) < rank(y); });
@@ -6613,7 +6628,7 @@ void CardsActivity::saveAllPictures(bool quiet) {
                 if (std::strchr("\\/:*?\"<>|", ch) || static_cast<unsigned char>(ch) < 32) ch = '-';
             while (!name.empty() && (name.back() == '.' || name.back() == ' ')) name.pop_back();
             if (name.size() > 60) name.resize(60);
-            return std::string("sdmc:/config/CardsNX/pictures/") + (name.empty() ? "Game" : name);
+            return std::string(HNP_CFG_CARDS "/pictures/") + (name.empty() ? "Game" : name);
         };
         auto keep = [](const std::string& dir, const char* what, const std::vector<std::uint8_t>& data) {
             if (data.size() < 64) return;
@@ -6748,7 +6763,43 @@ std::string CardsActivity::netTestText(int row) {
     }
 }
 
+// HomeNX+ : un texte libre dans la fenetre du journal (paragraphes separes par des lignes vides).
+void CardsActivity::openReader(const std::string& title, const std::string& text, const char* glyph) {
+    m_log.clear();
+    const float textW = kPickCard.width - 80.f;
+    float height = 0.f;
+    std::string para;
+    auto flush = [&]() {
+        if (para.empty()) return;
+        LogEntry e{"", wrap(m_fBody, plain(para), textW)};
+        height += 30.f * static_cast<float>(e.lines.size()) + 16.f;
+        m_log.push_back(std::move(e));
+        para.clear();
+    };
+    size_t start = 0;
+    for (;;) {
+        const size_t end = text.find('\n', start);
+        std::string line = text.substr(start, end == std::string::npos ? std::string::npos : end - start);
+        if (!line.empty() && line.back() == '\r') line.pop_back();
+        if (line.empty()) flush();
+        else para += (para.empty() ? "" : "\n") + line;
+        if (end == std::string::npos) break;
+        start = end + 1;
+    }
+    flush();
+    if (m_log.empty()) m_log.push_back({"", {tr("(vide)")}});
+    m_logTitle = title;
+    m_logIcon = glyph ? glyph : "news";
+    m_logEnd = std::max(0.f, height - (kPickCard.height - 120.f));
+    m_logScroll = 0.f;
+    m_logIn = m_settings.motion ? 0.f : 1.f;
+    m_logOpen = true;
+    m_audio.play("show_modal");
+}
+
 void CardsActivity::openUpdateLog() {
+    m_logTitle = "Update log";
+    m_logIcon = "sort";
     m_log.clear();
     std::ifstream in(std::string(kAssets) + "updates.txt");
     std::string line;
@@ -6793,8 +6844,8 @@ void CardsActivity::drawLog(nxui::Renderer& r) {
     const nxui::Rect card = scaled(kPickCard, 0.95f + 0.05f * easeOutBack(m_logIn));
     frost(r, card, 34.f, nxui::Color(0.08f, 0.09f, 0.13f, 0.88f * a));
     r.drawRoundedRectOutline(card, nxui::Color(1.f, 1.f, 1.f, 0.16f * a), 34.f, 1.5f);
-    icon(r, "sort", card.x + 46.f, card.y + 46.f, 26.f, kWhite.withAlpha(a));
-    textMid(r, m_fTitle, "Update log", card.x + 72.f, card.y + 46.f, kWhite.withAlpha(a));
+    icon(r, m_logIcon.c_str(), card.x + 46.f, card.y + 46.f, 26.f, kWhite.withAlpha(a));
+    textMid(r, m_fTitle, fit(m_fTitle, m_logTitle, card.width - 420.f), card.x + 72.f, card.y + 46.f, kWhite.withAlpha(a));
     const std::string hint = "Up / Down Scroll    B Back";
     textMid(r, m_fBody, hint, card.x + card.width - 36.f - measured(m_fBody, hint).x, card.y + 48.f, kMuted.withAlpha(0.8f * a));
     const float top = card.y + 92.f, bottom = card.y + card.height - 22.f;
@@ -6803,9 +6854,10 @@ void CardsActivity::drawLog(nxui::Renderer& r) {
     for (const LogEntry& e : m_log) {
         const float h = 30.f * static_cast<float>(e.lines.size()) + 16.f;
         if (y + h > top && y < bottom) {
-            textMid(r, m_fBody, e.date, card.x + 40.f, y + 15.f, kMuted.withAlpha(a));
+            const float tx = e.date.empty() ? card.x + 40.f : card.x + 160.f; // (HomeNX+ : sans date, toute la largeur)
+            if (!e.date.empty()) textMid(r, m_fBody, e.date, card.x + 40.f, y + 15.f, kMuted.withAlpha(a));
             for (size_t i = 0; i < e.lines.size(); ++i)
-                textMid(r, m_fBody, e.lines[i], card.x + 160.f, y + 15.f + 30.f * static_cast<float>(i), kWhite.withAlpha(a));
+                textMid(r, m_fBody, e.lines[i], tx, y + 15.f + 30.f * static_cast<float>(i), kWhite.withAlpha(a));
         }
         y += h;
     }
@@ -7474,8 +7526,8 @@ void CardsActivity::runUpdate() {
         say("NXToggle isn't on the SD card yet.");
         return;
     }
-    std::filesystem::create_directories("sdmc:/config/SwitchU/update", ec);
-    std::ofstream("sdmc:/config/SwitchU/update/autostart") << "1";
+    std::filesystem::create_directories(HNP_CFG_SWITCHU "/update", ec);
+    std::ofstream(HNP_CFG_SWITCHU "/update/autostart") << "1";
     openNro(kToggle);
 #endif
 }
@@ -7548,7 +7600,7 @@ void CardsActivity::showNewsItem(int index) {
     if (n.unread && !n.id.empty()) {
         n.unread = false;
         std::error_code ec;
-        std::filesystem::create_directories("sdmc:/config/SwitchU", ec);
+        std::filesystem::create_directories(HNP_CFG_SWITCHU "", ec);
         std::ofstream(kNewsReadPath, std::ios::app) << n.id << '\n';
     }
     if (n.picture && !m_newsPictures.count(index)) {
@@ -8210,6 +8262,9 @@ void CardsActivity::onUpdate(float dt) {
     }
     if (m_friendCodeJob.valid() && m_friendCodeJob.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
         m_friendCode = m_friendCodeJob.get();
+#endif
+#ifdef HNP_PLUS
+    hnpPoll(); // HomeNX+ : une tache de fond terminee ?
 #endif
     if (m_reportJob.valid() && m_reportJob.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
         const long status = m_reportJob.get();

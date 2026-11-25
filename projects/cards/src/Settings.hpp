@@ -10,6 +10,10 @@
 #include <string>
 #include <vector>
 
+#ifndef HNP_CFG_CARDS
+#define HNP_CFG_CARDS "sdmc:/config/CardsNX"
+#endif
+
 namespace cards {
 
 struct CustomPage {
@@ -106,7 +110,7 @@ struct Settings {
         if (static_cast<int>(hiddenPages.size()) == count) hiddenPages.erase(hiddenPages.begin());
     }
 
-    static constexpr const char* kPath = "sdmc:/config/CardsNX/settings.json";
+    static constexpr const char* kPath = HNP_CFG_CARDS "/settings.json";
 
     bool pinGameCard() const { return (gameCardDisplay & 1) != 0; }
     bool showGameCardTitle() const { return (gameCardDisplay & 2) != 0; }

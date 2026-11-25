@@ -1,3 +1,4 @@
+#include "hnp/safemode.hpp"
 #include "WiiUMenuApp.hpp"
 #include "FontChoice.hpp"
 #include "social/NotificationLog.hpp"
@@ -56,7 +57,7 @@ std::optional<std::uint64_t> queryApplicationPlaytimeSeconds(std::uint64_t title
 }
 #endif
 
-static constexpr const char* kLayoutPath = "sdmc:/config/SwitchU/layout.json";
+static constexpr const char* kLayoutPath = HNP_CFG_SWITCHU "/layout.json";
 static constexpr int kMinHomePages = 1;
 static constexpr int kMaxHomePages = switchu::folders::kMaxFolderPages;
 static constexpr const char* kBuiltInSoundPreset = "wiiu";
@@ -187,7 +188,7 @@ std::string installedThemePathFromPackagePreset(const std::string& preset) {
     if (slug.empty())
         return {};
 
-    const std::string installPath = std::string("sdmc:/config/SwitchU/themes/") + slug;
+    const std::string installPath = std::string(HNP_CFG_SWITCHU "/themes/") + slug;
     return directoryExists(installPath) ? installPath : std::string();
 }
 
@@ -476,7 +477,7 @@ bool WiiUMenuApp::presentInitialFrame(nxui::Renderer& ren) {
 }
 
 namespace {
-constexpr const char* kCustomNamesPath = "sdmc:/config/SwitchU/homenx_names.json";
+constexpr const char* kCustomNamesPath = HNP_CFG_SWITCHU "/homenx_names.json";
 }
 
 void WiiUMenuApp::loadCustomNames() {
@@ -498,7 +499,7 @@ void WiiUMenuApp::saveCustomNames() const {
         j[key] = name;
     }
     std::error_code ec;
-    std::filesystem::create_directories("sdmc:/config/SwitchU", ec);
+    std::filesystem::create_directories(HNP_CFG_SWITCHU "", ec);
     std::ofstream(kCustomNamesPath) << j.dump(2);
 }
 
@@ -521,7 +522,7 @@ void WiiUMenuApp::confirmCloseSuspendedThen(std::function<void()> go, bool appli
     std::error_code ec;
     const std::uint64_t running = m_launcher.suspendedTitleId();
     if (running != 0 && m_dialog
-        && (applicationMode || !std::filesystem::exists("sdmc:/switch/SwitchU/homebrew_applet_mode", ec))) {
+        && (applicationMode || !std::filesystem::exists(HNP_SW_DATA "/homebrew_applet_mode", ec))) {
         auto& i18n = nxui::I18n::instance();
         std::string title = i18n.tr("game.this_software", "the software that's open");
         for (const AppEntry& app : m_allApps)
@@ -982,6 +983,12 @@ bool WiiUMenuApp::onCreate() {
     DebugLog::log("[init] onCreate enter");
     m_iconStreamer.setThreadPool(&m_threadPool);
     m_config.load();
+    if (hnp::g_safeMode) {  // HomeNX+ : demarrage allege apres 3 plantages
+        m_config.glassEffects = false;
+        m_config.musicEnabled = false;
+        m_config.steamGridDbEnabled = false;
+        DebugLog::log("[hnp] mode sans echec : verre, musique et SteamGridDB coupes");
+    }
     m_appLayoutMode = m_config.appLayoutMode;
     loadMenuLayout();
     if (!m_folderStore.load())
@@ -1676,7 +1683,7 @@ void WiiUMenuApp::startRebootToHekate() {
         std::error_code ec;
         if (std::filesystem::exists(kCards, ec) && AppletLauncher::canRebootToPayload()
             && !AppletLauncher::hekatePayload().empty()) {
-            std::ofstream("sdmc:/config/SwitchU/cardsnx_reboot_hekate") << "1";
+            std::ofstream(HNP_CFG_SWITCHU "/cardsnx_reboot_hekate") << "1";
             openBundledApp(kCards, "CardsNX");
             return;
         }
@@ -2125,7 +2132,7 @@ void WiiUMenuApp::saveMenuLayout() {
     std::error_code ec;
     std::filesystem::create_directory("sdmc:/config", ec);
     ec.clear();
-    std::filesystem::create_directory("sdmc:/config/SwitchU", ec);
+    std::filesystem::create_directory(HNP_CFG_SWITCHU "", ec);
 
     nlohmann::json j;
     j["version"] = 1;
@@ -4460,7 +4467,7 @@ void WiiUMenuApp::activateApplication(GlossyIcon* source, AppEntry* entry,
         // selector, so do not blindly inject a configured local default UID.
         // Settings > HomeNX > Ask who's playing: the users each time (not the saved one).
         std::error_code askEc;
-        const bool ask = std::filesystem::exists("sdmc:/config/SwitchU/ask_user", askEc);
+        const bool ask = std::filesystem::exists(HNP_CFG_SWITCHU "/ask_user", askEc);
         if (m_config.defaultProfileEnabled && entry->startupUserAccount != 2 && !ask) {
             AccountUid defaultUid{};
             if (hexToAccountUid(m_config.defaultProfileUid, defaultUid)) {
@@ -6004,7 +6011,7 @@ void WiiUMenuApp::handleLockScreenAutoSleep() {
 // Settings > HomeNX > Lock screen (a flag file: HOME's Settings and its start read it).
 bool WiiUMenuApp::lockScreenOn() {
     std::error_code ec;
-    return std::filesystem::exists("sdmc:/config/SwitchU/lock_screen", ec);
+    return std::filesystem::exists(HNP_CFG_SWITCHU "/lock_screen", ec);
 }
 
 void WiiUMenuApp::onUpdateAwake(float dt) {

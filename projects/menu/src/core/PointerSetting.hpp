@@ -5,7 +5,7 @@
 // sdmc:/config/SwitchU/pointer_mode.txt. Motion is what HOME always did.
 namespace pointersetting {
 
-inline constexpr const char* kPath = "sdmc:/config/SwitchU/pointer_mode.txt";
+inline constexpr const char* kPath = HNP_CFG_SWITCHU "/pointer_mode.txt";
 
 inline int read() {
     int mode = 1;

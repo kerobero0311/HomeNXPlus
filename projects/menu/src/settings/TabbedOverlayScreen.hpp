@@ -26,6 +26,7 @@ class ThemeShopInstalledTab;
 class ThemeShopCommunityTab;
 class AboutTab;
 class HomeNXTab;
+class HomeNXPlusTab;
 }
 
 class TabbedOverlayScreen : public nxui::GlassWidget {

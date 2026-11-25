@@ -18,8 +18,8 @@ struct Item {
     std::string kind, title, text;
 };
 
-inline constexpr const char* kPath = "sdmc:/config/SwitchU/notifications.txt";
-inline constexpr const char* kSeenPath = "sdmc:/config/SwitchU/notifications_seen.txt";
+inline constexpr const char* kPath = HNP_CFG_SWITCHU "/notifications.txt";
+inline constexpr const char* kSeenPath = HNP_CFG_SWITCHU "/notifications_seen.txt";
 
 inline std::string flat(std::string s) {
     for (char& c : s)

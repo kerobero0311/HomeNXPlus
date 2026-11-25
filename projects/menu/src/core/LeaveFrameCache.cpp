@@ -54,7 +54,7 @@ bool save(const LeaveFrameSession& session,
         return false;
 
     std::error_code ec;
-    std::filesystem::create_directories("sdmc:/config/SwitchU", ec);
+    std::filesystem::create_directories(HNP_CFG_SWITCHU "", ec);
 
     Header header{};
     header.magic = kMagic;

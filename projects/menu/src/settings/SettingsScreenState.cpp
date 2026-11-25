@@ -20,6 +20,7 @@ void SettingsScreen::buildTabs() {
         {.name = i18n.tr("settings.tabs.sleep", "Sleep")},
         {.name = i18n.tr("settings.tabs.about", "About")},
         {.name = "HomeNX"}, // 11: sidebar, custom button, look; frontend updates / off
+        {.name = "HomeNX+"}, // 12: HomeNX+ (Claude, scenes, batterie, rangement)
     };
     m_loadedTabs.assign(m_tabs.size(), false);
     m_loadingTabs.assign(m_tabs.size(), false);
@@ -70,6 +71,7 @@ SettingsScreen::Tab SettingsScreen::buildTabNow(int tabIndex) {
         case 9: return settings::tabs::SleepTab::build(*this);
         case 10: return settings::tabs::AboutTab::build(*this);
         case 11: return settings::tabs::HomeNXTab::build(*this);
+        case 12: return settings::tabs::HomeNXPlusTab::build(*this);
         default: break;
     }
 

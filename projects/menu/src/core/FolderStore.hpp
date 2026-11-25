@@ -59,9 +59,9 @@ inline std::uint64_t firstCoverTitleId(const Folder& folder) {
 
 class FolderStore final {
 public:
-    static constexpr const char* kPath = "sdmc:/config/SwitchU/folders.json";
-    static constexpr const char* kTempPath = "sdmc:/config/SwitchU/folders.tmp";
-    static constexpr const char* kBackupPath = "sdmc:/config/SwitchU/folders.bak";
+    static constexpr const char* kPath = HNP_CFG_SWITCHU "/folders.json";
+    static constexpr const char* kTempPath = HNP_CFG_SWITCHU "/folders.tmp";
+    static constexpr const char* kBackupPath = HNP_CFG_SWITCHU "/folders.bak";
 
     bool load();
     bool save() const;
