@@ -45,10 +45,15 @@ constexpr const char* kPcFile     = "sdmc:/config/homenxplus/pc_agent.ini";
 constexpr const char* kClaudeNro  = "sdmc:/switch/ClaudeNX/ClaudeNX.nro";
 constexpr const char* kSelfNro    = "sdmc:/switch/HomeNXPlus/HomeNXPlus.nro";  // le .nro de test
 constexpr const char* kStyleFile  = HNP_CFG_SWITCHU "/frontend.txt";
-constexpr const char* kVersion    = "HomeNX+ 0.9.4";
-constexpr const char* kVersionNum = "0.9.4";
+constexpr const char* kVersion    = "HomeNX+ 0.9.5";
+constexpr const char* kVersionNum = "0.9.5";
 constexpr const char* kWelcomeDone = "sdmc:/config/homenxplus/assistant_fait";
 constexpr const char* kNightAuto  = "sdmc:/config/homenxplus/theme_nuit_auto";
+constexpr const char* kPlayRemind = "sdmc:/config/homenxplus/rappel_jeu";        // minutes, absent = coupé
+constexpr const char* kLaunchFile = "sdmc:/homenxplus/lancement.txt";            // heure de lancement du dernier jeu
+constexpr const char* kSavesAuto  = "sdmc:/config/homenxplus/saves_auto";        // présent = sauvegarde hebdo
+constexpr const char* kSavesLast  = "sdmc:/homenxplus/saves_auto_derniere.txt";
+constexpr const char* kStatsDir   = "sdmc:/homenxplus/stats";
 constexpr const char* kSceneAuto  = "sdmc:/homenxplus/scene_auto.txt";  // scene posee au lancement d'un jeu
 
 std::string readAll(const std::string& p) {
@@ -155,6 +160,7 @@ void CardsActivity::hnpPoll() {
         m_hnpStarted = true;
         std::error_code ec;
         if (!std::filesystem::exists(kWelcomeDone, ec)) openHnpWelcome();
+        hnpStartChecks();
 #ifdef SWITCHU_MENU
         const bool gameOpen = runningId() != 0;
 #else
@@ -343,7 +349,13 @@ void CardsActivity::openHnpClaude() {
     }
     std::error_code ec;
     if (std::filesystem::exists(kClaudeNro, ec)) {
-        MenuItem nx = action("Ouvrir ClaudeNX (conversations)", [this]() { openNro(kClaudeNro); });
+        if (key) {
+        MenuItem agent = action("Demander une action à Claude", [this]() { openHnpAgent(); });
+        agent.detail = "Ex. « mets la scène Nuit », « cherche Mario » : tu confirmes avant";
+        agent.glyph = "sun";
+        items.push_back(std::move(agent));
+    }
+    MenuItem nx = action("Ouvrir ClaudeNX (conversations)", [this]() { openNro(kClaudeNro); });
         nx.glyph = "play";
         items.push_back(std::move(nx));
     }
@@ -494,6 +506,13 @@ void CardsActivity::openHnpChecklist(const std::string& tid, const std::string& 
 
 void CardsActivity::hnpSceneForLaunch(std::uint64_t id) {
     const std::string tid = hex(id);
+    {
+        std::error_code ec;
+        std::filesystem::create_directories("sdmc:/homenxplus", ec);
+        std::string name;
+        for (const Game& g : m_pages[kGames]) if (g.id == id) name = g.name;
+        std::ofstream(kLaunchFile) << static_cast<long long>(std::time(nullptr)) << "\n0\n" << name;
+    }
     const hnp::Scenes sc = loadScenes();
     const auto per = sc.forGame(tid);
     if (!per || per->empty()) return;
@@ -724,6 +743,176 @@ void CardsActivity::openHnpAsk() {
     items.push_back(std::move(write));
     items.push_back(action("Annuler", [] {}));
     openMenu("Ta question à Claude", std::move(items));
+}
+
+// ---------------------------------------------------------------- semaine, rappel de pause, saves auto
+
+namespace {
+std::string weekKey(std::time_t t) { char b[16]; std::strftime(b, sizeof b, "%G-W%V", std::localtime(&t)); return b; }
+}
+
+void CardsActivity::hnpStartChecks() {
+    std::error_code ec;
+    const std::time_t now = std::time(nullptr);
+    // 1. Relevé de début de semaine (pour le résumé)
+    const std::string wf = std::string(kStatsDir) + "/semaine_" + weekKey(now) + ".json";
+    if (!std::filesystem::exists(wf, ec) && !m_pages[kGames].empty()) {
+        nlohmann::json j = nlohmann::json::object();
+        for (const Game& g : m_pages[kGames]) if (g.path.empty() && g.action.empty() && !g.homebrew) j[idText(g.id)] = g.playSeconds;
+        std::filesystem::create_directories(kStatsDir, ec);
+        std::ofstream(wf) << j.dump();
+    }
+    // 2. Rappel de pause après une longue partie
+    int limit = 0; std::ifstream(kPlayRemind) >> limit;
+    if (std::filesystem::exists(kLaunchFile, ec)) {
+        long long t0 = 0; int done = 0; std::string name;
+        { std::ifstream in(kLaunchFile); in >> t0 >> done; std::getline(in, name); std::getline(in, name); }
+#ifdef SWITCHU_MENU
+        const bool open = runningId() != 0;
+#else
+        const bool open = false;
+#endif
+        const long long mins = t0 > 0 && now > t0 ? (now - t0) / 60 : 0;
+        if (limit > 0 && !done && mins >= limit) {
+            const std::string msg = "Tu joues depuis " + std::to_string(mins / 60) + " h " + std::to_string(mins % 60) + " min"
+                                    + (name.empty() ? "" : " à " + name) + " : pense à faire une pause.";
+            notifyCard("Pause", msg, "moon");
+            say(msg);
+            std::ofstream(kLaunchFile) << t0 << "\n1\n" << name;
+        }
+        if (!open) std::filesystem::remove(kLaunchFile, ec);
+    }
+    // 3. Sauvegarde automatique des saves (une fois par semaine, PC allumé)
+    if (std::filesystem::exists(kSavesAuto, ec) && pcLink().configured()) {
+        long long last = 0; std::ifstream(kSavesLast) >> last;
+        if (now - last > 7LL * 24 * 3600) {
+            std::vector<std::pair<std::uint64_t, std::string>> recent;
+            std::vector<const Game*> gs;
+            for (const Game& g : m_pages[kGames]) if (g.path.empty() && g.action.empty() && !g.homebrew && g.lastPlayed) gs.push_back(&g);
+            std::sort(gs.begin(), gs.end(), [](const Game* a, const Game* b) { return a->lastPlayed > b->lastPlayed; });
+            for (size_t i = 0; i < gs.size() && i < 5; ++i) recent.push_back({gs[i]->id, gs[i]->name});
+#ifdef SWITCHU_MENU
+            const std::uint64_t open = runningId();
+#else
+            const std::uint64_t open = 0;
+#endif
+            const hnp::PcLink pc = pcLink();
+            if (!recent.empty() && !m_hnpJob.valid())
+                hnpRun("Sauvegarde automatique de tes saves vers le PC...", "", [pc, recent, open, now]() {
+                    if (!hnp::pingPc(pc)) return std::string("Sauvegarde auto : PC éteint, ce sera pour la prochaine fois.");
+                    int ok = 0;
+                    for (const auto& [id, name] : recent) {
+                        if (id == open) continue;  // jeu ouvert : sa sauvegarde est occupée
+                        if (hnp::sendSavesToPc(pc, id, name).find("copie") != std::string::npos) ++ok;
+                    }
+                    std::ofstream(kSavesLast) << static_cast<long long>(now);
+                    return "Sauvegarde auto : " + std::to_string(ok) + " jeu(x) copié(s) sur le PC.";
+                }, false);
+        }
+    }
+}
+
+void CardsActivity::openHnpWeekly() {
+    const std::time_t now = std::time(nullptr);
+    nlohmann::json start;
+    { std::ifstream in(std::string(kStatsDir) + "/semaine_" + weekKey(now) + ".json"); start = nlohmann::json::parse(in, nullptr, false); }
+    if (start.is_discarded() || !start.is_object()) { say("Le résumé commence cette semaine : reviens dans quelques jours."); return; }
+    std::vector<std::pair<std::uint64_t, std::string>> played;  // secondes, nom
+    std::uint64_t total = 0;
+    for (const Game& g : m_pages[kGames]) {
+        const std::string k = idText(g.id);
+        const std::uint64_t before = start.contains(k) && start[k].is_number() ? start[k].get<std::uint64_t>() : 0;
+        if (g.playSeconds > before) { played.push_back({g.playSeconds - before, g.name}); total += g.playSeconds - before; }
+    }
+    std::sort(played.begin(), played.end(), [](const auto& a, const auto& b) { return a.first > b.first; });
+    auto hm = [](std::uint64_t s) { return std::to_string(s / 3600) + " h " + (s % 3600 / 60 < 10 ? "0" : "") + std::to_string(s % 3600 / 60); };
+    std::string t = "Semaine " + weekKey(now) + " : " + hm(total) + " de jeu, " + std::to_string(played.size()) + " jeu(x)\n\n";
+    for (size_t i = 0; i < played.size() && i < 8; ++i) t += "- " + played[i].second + " : " + hm(played[i].first) + "\n";
+    if (played.empty()) t += "Pas encore de partie cette semaine.\n";
+    const hnp::BatteryStatus b = hnp::readBattery();
+    if (b.percent >= 0) t += "\nBatterie maintenant : " + std::to_string(b.percent) + " %\n";
+    std::vector<MenuItem> items;
+    items.push_back(action("Lire le résumé", [this, t]() { openReader("Résumé de la semaine", t, "sort"); }));
+    items.back().glyph = "news";
+    if (pcLink().configured()) {
+        const hnp::PcLink pc = pcLink();
+        items.push_back(action("Envoyer le résumé au PC", [this, pc, t]() {
+            hnpRun("Envoi du résumé...", "", [pc, t]() { return hnp::sendToPc(pc, "Résumé HomeNX+\n" + t); }, false);
+        }));
+        items.back().glyph = "wifi";
+    }
+    items.push_back(action("Fermer", [] {}));
+    openMenu("Résumé : " + hm(total) + " cette semaine", std::move(items));
+}
+
+// ---------------------------------------------------------------- Claude agit (liste fermée, toujours confirmé)
+
+void CardsActivity::openHnpAgent() {
+    askText("Que veux-tu que je fasse ?", "Ex. : mets la scène Nuit, cherche Zelda, note « boss au 3e étage »", "", 300,
+            [this](const std::string& q) {
+        if (q.find_first_not_of(" \r\n\t") == std::string::npos) return;
+        std::string scenes;
+        for (const hnp::Scene& s : loadScenes().list()) scenes += (scenes.empty() ? "" : ", ") + s.id + " (" + s.name + ")";
+        const Game* g = current();
+        const std::string game = g ? g->name : std::string();
+        const std::string prompt =
+            "Tu pilotes le menu HomeNX+ d'une Nintendo Switch. Demande de l'utilisateur : « " + q + " ».\n"
+            "Actions possibles, et AUCUNE autre : scene (valeur = un identifiant parmi : " + scenes + "), "
+            "aucune_scene, recherche (valeur = texte à chercher dans les jeux), note (valeur = texte à ajouter aux notes du jeu « "
+            + game + " »), message_pc (valeur = texte à envoyer au PC), style (valeur = wiiu), statistiques, resume_semaine, aucune.\n"
+            "Réponds UNIQUEMENT par un objet JSON : {\"action\": \"...\", \"valeur\": \"...\", \"explication\": \"une phrase en français\"}.";
+        hnpRun("Claude prépare une action...", "", [prompt]() {
+            std::string out;
+            return hnp::askClaudeOnce(prompt, out, 400) ? out : "ERREUR " + out;
+        }, false, [this](const std::string& r) {
+            if (r.rfind("ERREUR ", 0) == 0) { say(r.substr(7)); return; }
+            const size_t a = r.find('{'), b = r.rfind('}');
+            const nlohmann::json j = a != std::string::npos && b != std::string::npos && b > a ? nlohmann::json::parse(r.substr(a, b - a + 1), nullptr, false) : nlohmann::json();
+            if (!j.is_object()) { say("Claude n'a pas proposé d'action claire : reformule."); return; }
+            const std::string act = j.value("action", ""), val = j.value("valeur", ""), why = j.value("explication", "");
+            static const std::set<std::string> kOk = {"scene", "aucune_scene", "recherche", "note", "message_pc", "style", "statistiques", "resume_semaine"};
+            if (!kOk.count(act)) { say(why.empty() ? "Je ne peux pas faire ça depuis le menu." : why); return; }
+            openMenu("Claude propose : " + (why.empty() ? act : why), {
+                action("Oui, fais-le", [this, act, val]() { hnpRunAgentAction(act, val); }),
+                action("Non", [] {}),
+            });
+        });
+    });
+}
+
+void CardsActivity::hnpRunAgentAction(const std::string& act, const std::string& val) {
+    if (act == "scene") {
+        hnpRun("Scène en cours d'application...", "", [val]() {
+            hnp::Scenes x = loadScenes();
+            const hnp::Scene* s = x.find(val);
+            if (!s) return std::string("Scène inconnue.");
+            const std::string msg = hnp::applyScene(*s);
+            x.active = val;
+            saveScenes(x);
+            return msg;
+        }, false);
+    } else if (act == "aucune_scene") {
+        hnpRun("Retour aux réglages normaux...", "", []() { hnp::Scenes x = loadScenes(); x.active.clear(); saveScenes(x); return hnp::clearScene(); }, false);
+    } else if (act == "recherche") {
+        hnpSearchResults(val);
+    } else if (act == "note") {
+        const Game* g = current();
+        if (!g || !g->path.empty() || !g->action.empty() || g->homebrew) { say("Choisis d'abord un jeu."); return; }
+        hnp::GameNotes n = loadNotes(hex(g->id));
+        n.titleId = hex(g->id);
+        n.text += (n.text.empty() ? "" : "\n") + val.substr(0, 1000);
+        saveNotes(n);
+        say("Note ajoutée à " + g->name + ".");
+    } else if (act == "message_pc") {
+        const hnp::PcLink pc = pcLink();
+        hnpRun("Envoi au PC...", "", [pc, val]() { return hnp::sendToPc(pc, val.substr(0, 2000)); }, false);
+    } else if (act == "style") {
+        hnpSwitchStyle(false);
+    } else if (act == "statistiques") {
+        openHnpStats();
+    } else if (act == "resume_semaine") {
+        openHnpWeekly();
+    }
 }
 
 // ---------------------------------------------------------------- recherche (Y, clavier USB)
@@ -1049,6 +1238,27 @@ void CardsActivity::openHnp() {
     smart.detail = "Récents, Plus joués, Jamais lancés : mises à jour à chaque appui";
     smart.glyph = "sort";
     items.push_back(std::move(smart));
+    MenuItem week = action("Résumé de la semaine", [this]() { openHnpWeekly(); });
+    week.glyph = "sort";
+    items.push_back(std::move(week));
+    MenuItem remind = choice("Rappel de pause", [] {
+        int m = 0; std::ifstream(kPlayRemind) >> m;
+        return m > 0 ? "Après " + std::to_string(m / 60) + " h de jeu" : std::string("Coupé");
+    }, [](int) {
+        int m = 0; std::ifstream(kPlayRemind) >> m;
+        const int next = m == 0 ? 60 : m == 60 ? 120 : m == 120 ? 180 : 0;
+        std::error_code ec;
+        if (!next) std::filesystem::remove(kPlayRemind, ec);
+        else { std::filesystem::create_directories("sdmc:/config/homenxplus", ec); std::ofstream(kPlayRemind) << next; }
+    }, "Un message au retour au menu après une longue partie");
+    items.push_back(std::move(remind));
+    MenuItem autosave = toggle("Sauvegarde auto des saves", [] { std::error_code ec; return std::filesystem::exists(kSavesAuto, ec); },
+        []() {
+            std::error_code ec;
+            if (std::filesystem::exists(kSavesAuto, ec)) std::filesystem::remove(kSavesAuto, ec);
+            else { std::filesystem::create_directories("sdmc:/config/homenxplus", ec); std::ofstream(kSavesAuto) << "1"; }
+        }, "Chaque semaine, les 5 derniers jeux joués vers le PC");
+    items.push_back(std::move(autosave));
     MenuItem stats = action("Statistiques de jeu", [this]() { openHnpStats(); });
     stats.glyph = "trophy";
     items.push_back(std::move(stats));

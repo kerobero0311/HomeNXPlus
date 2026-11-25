@@ -24,13 +24,13 @@ cartes de la page Médias, panneau HomeNX+ et apparence Wii U (0.9.3). Liste com
 |---|---|
 | Widgets dans le panneau du bas | **À faire** (dessin de l'écran, à vérifier sur la console) |
 | Statistiques de jeu | **Fait** (0.9.4 : panneau > Statistiques de jeu) |
-| Rappel de temps de jeu | **À faire** (le menu dort pendant les jeux : passera par l'overlay) |
+| Rappel de temps de jeu | **Fait** (0.9.5 : au retour au menu après 1, 2 ou 3 h de jeu) |
 | Dossiers dans les Cartes | **En partie** : pages perso, pages intelligentes et rangement par Claude |
 | Captures dans la fiche de jeu | **Fait** (0.9.4 : liste des captures du jeu) |
 | Claude : choisir ce qu'on joint | **Fait** (0.9.4 : jeu, notes, capture à cocher) |
-| Claude peut agir | **À faire** |
-| Résumé de la semaine | **À faire** |
-| Sauvegarde auto des saves | **En partie** : copie à la demande ; automatique à faire |
+| Claude peut agir | **Fait** (0.9.5 : liste fermée d'actions, toujours confirmée) |
+| Résumé de la semaine | **Fait** (0.9.5 : envoyable au PC) |
+| Sauvegarde auto des saves | **Fait** (0.9.5 : chaque semaine, 5 derniers jeux, PC allumé) |
 | Thème jour / nuit | **Fait** (0.9.4 : verre sombre de 20 h à 7 h) |
 | Combinaisons de touches | **En partie** : Y = recherche, stick gauche = panneau |
 | Rappels | **En partie** : alertes batterie 15 % et 8 % |
@@ -64,5 +64,5 @@ Ces dix-là changent le dessin de l'écran : à faire une par une, chacune véri
 | Mises à jour depuis l'appli | **Fait** (0.9.4 : panneau > Mettre à jour HomeNX+) |
 
 ## Bilan
-Fait : 21 · En partie : 8 · À faire : 16 · Toi : 5 (sur 50).
+Fait : 25 · En partie : 7 · À faire : 13 · Toi : 5 (sur 50).
 Avant tout le reste : **tester les versions 0.9.1 à 0.9.4 sur la console** (`TESTS_CONSOLE.md`).

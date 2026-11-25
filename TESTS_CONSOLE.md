@@ -47,6 +47,12 @@ Le vrai menu HOME n'est pas modifiÃ© : rien ne peut casser le dÃ©marrage.
 - [ ] Panneau > Mettre à jour HomeNX+ : « à jour (0.9.4) »
 - [ ] Page Médias : 16 services (Netflix… Apple Music)
 
+## 1 F. Nouveautés 0.9.5
+- [ ] Panneau > Résumé de la semaine (après quelques jours) ; « Envoyer le résumé au PC »
+- [ ] Panneau > Rappel de pause : 1 h ; jouer plus d'1 h, revenir au menu : message « pense à faire une pause »
+- [ ] Panneau > Sauvegarde auto des saves (PC allumé, pc_agent lancé) : au prochain retour au menu, copie vers le PC
+- [ ] Panneau > Claude > Demander une action : « mets la scène Nuit » → Claude propose, « Oui, fais-le » applique
+
 ## 1 ter. Onglet Â« HomeNX+ Â» (dans HomeNX+ : RÃ©glages, dernier onglet Ã  droite)
 - [ ] L'onglet **HomeNX+** apparaÃ®t aprÃ¨s Â« HomeNX Â»
 - [ ] Claude : Â« ClÃ© API : PrÃ©sente Â» une fois la clÃ© mise ; Â« Ouvrir ClaudeNX Â» lance ClaudeNX

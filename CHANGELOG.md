@@ -93,3 +93,9 @@
 - Statistiques de jeu ; captures du jeu dans sa fiche ; Claude : choisir ce qu'on joint (jeu, notes, capture) ; thème nuit automatique.
 - 16 services par le PC ; boutique d'applis (35 applis) et son installeur ; publication GitHub et site.
 - FEUILLE_DE_ROUTE.md (état des 50 choix), promo/textes_diffusion.md.
+
+## 0.9.5 (25/11/2026)
+- Résumé de la semaine (temps de jeu par jeu), envoyable au PC.
+- Rappel de pause au retour au menu après 1, 2 ou 3 h de jeu.
+- Sauvegarde automatique des saves des 5 derniers jeux vers le PC, une fois par semaine.
+- Claude peut agir : il propose une action d'une liste fermée (scène, recherche, note, message au PC, style, statistiques), tu confirmes.

@@ -825,6 +825,10 @@ private:
     void openHnpWelcome();                                  // assistant du premier lancement
     void openHnpGallery(std::uint64_t id, const std::string& name); // captures d'un jeu
     void openHnpAsk();                                      // question à Claude, avec ce qu'on joint
+    void openHnpWeekly();                                   // résumé de la semaine
+    void hnpStartChecks();                                  // au retour au menu : rappel de jeu, saves auto, semaine
+    void openHnpAgent();                                    // Claude propose une action, tu confirmes
+    void hnpRunAgentAction(const std::string& action, const std::string& value);
     std::uint64_t m_hnpNightTick = 0;
     int m_hnpDayGlass = -1;                                 // verre choisi le jour (thème nuit auto)
     void hnpPlayPc();                                       // reveille le PC puis lance Moonlight
