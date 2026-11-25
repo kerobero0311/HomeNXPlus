@@ -820,6 +820,13 @@ private:
     void hnpSearchResults(const std::string& query);
     void hnpKeyboard();                                     // une lettre tapee au clavier USB lance la recherche
     void hnpAssistSort();                                   // Claude propose des pages par genre
+    void openHnpStats();                                    // statistiques de jeu
+    void hnpCheckUpdate();                                  // mise à jour de HomeNX+ depuis GitHub
+    void openHnpWelcome();                                  // assistant du premier lancement
+    void openHnpGallery(std::uint64_t id, const std::string& name); // captures d'un jeu
+    void openHnpAsk();                                      // question à Claude, avec ce qu'on joint
+    std::uint64_t m_hnpNightTick = 0;
+    int m_hnpDayGlass = -1;                                 // verre choisi le jour (thème nuit auto)
     void hnpPlayPc();                                       // reveille le PC puis lance Moonlight
     bool m_hnpKbdReady = false;
     std::uint64_t m_hnpKbdPrev[4] = {};

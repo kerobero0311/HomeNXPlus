@@ -38,6 +38,15 @@ Le vrai menu HOME n'est pas modifiÃ© : rien ne peut casser le dÃ©marrage.
 - [ ] Page MÃ©dias > Jeux du PC (PC en veille, Wake-on-LAN actif) : le PC se rÃ©veille, puis Moonlight dÃ©marre
 - [ ] Apparence Wii U > RÃ©glages > HomeNX+ > MÃ©dias : Netflix ouvre le site sur le PC puis Moonlight
 
+## 1 E. Nouveautés 0.9.4
+- [ ] Premier lancement : l'écran « Premiers pas » s'ouvre (une seule fois)
+- [ ] Panneau > Statistiques de jeu : total, top 10, joués récemment
+- [ ] Panneau > Claude > Poser une question : cases jeu / notes / capture, puis réponse
+- [ ] + sur un jeu > Fiche > Mes captures de ce jeu
+- [ ] Panneau > Thème nuit automatique (le soir : verre sombre)
+- [ ] Panneau > Mettre à jour HomeNX+ : « à jour (0.9.4) »
+- [ ] Page Médias : 16 services (Netflix… Apple Music)
+
 ## 1 ter. Onglet Â« HomeNX+ Â» (dans HomeNX+ : RÃ©glages, dernier onglet Ã  droite)
 - [ ] L'onglet **HomeNX+** apparaÃ®t aprÃ¨s Â« HomeNX Â»
 - [ ] Claude : Â« ClÃ© API : PrÃ©sente Â» une fois la clÃ© mise ; Â« Ouvrir ClaudeNX Â» lance ClaudeNX

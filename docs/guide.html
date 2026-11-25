@@ -1,0 +1,285 @@
+﻿<!doctype html>
+<html lang="fr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Guide de ma Switch</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700&family=Manrope:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Mise en page : un manuel sur une colonne, sommaire en tÃªte, une section par usage ; imprimable en PDF. */
+:root {
+  --bg: #f6f7fa;
+  --paper: #ffffff;
+  --ink: #161922;
+  --muted: #5b6273;
+  --line: #dfe2ea;
+  --red: #d93a2e;
+  --teal: #0f8f7e;
+  --chip: #eef0f5;
+  --warn-bg: #fff3e6;
+  --warn: #a35400;
+  --display: "Unbounded", "Arial Black", system-ui, sans-serif;
+  --body: "Manrope", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e1016; --paper: #161923; --ink: #eceff5; --muted: #9aa2b4; --line: #282d3a; --red: #ff6a5c; --teal: #38d9c3; --chip: #20242f; --warn-bg: #2e2112; --warn: #ffb35c;
+  color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0e1016; --paper: #161923; --ink: #eceff5; --muted: #9aa2b4; --line: #282d3a; --red: #ff6a5c; --teal: #38d9c3; --chip: #20242f; --warn-bg: #2e2112; --warn: #ffb35c;
+  color-scheme: dark }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15.5px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; }
+.doc { max-width: 860px; margin: 0 auto; background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: clamp(20px, 4vw, 48px); display: grid; gap: 30px; }
+.cover { display: grid; gap: 10px; border-bottom: 3px solid var(--red); padding-bottom: 22px; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--teal); }
+h1 { font-family: var(--display); font-weight: 700; font-size: clamp(28px, 5vw, 42px); line-height: 1.08; margin: 0; text-wrap: balance; }
+h1 b { color: var(--red); }
+.lead { color: var(--muted); margin: 0; max-width: 62ch; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px; }
+.meta span { font-family: var(--mono); font-size: 12px; background: var(--chip); border-radius: 99px; padding: 4px 10px; }
+nav.toc { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 4px 24px; font-size: 14.5px; }
+nav.toc a { color: var(--ink); text-decoration: none; padding: 4px 0; border-bottom: 1px dotted var(--line); display: flex; gap: 10px; }
+nav.toc a span { font-family: var(--mono); color: var(--muted); font-size: 12px; min-width: 22px; padding-top: 2px; }
+nav.toc a:hover { color: var(--red); }
+section { display: grid; gap: 12px; min-width: 0; }
+h2 { font-family: var(--display); font-weight: 600; font-size: 21px; margin: 0; display: flex; gap: 12px; align-items: baseline; text-wrap: balance; }
+h2 span { font-family: var(--mono); font-size: 13px; color: var(--red); }
+h3 { font-size: 16px; margin: 6px 0 0; }
+p { margin: 0; max-width: 68ch; }
+ol, ul { margin: 0; padding-left: 22px; display: grid; gap: 4px; max-width: 70ch; }
+kbd, code { font-family: var(--mono); font-size: .88em; background: var(--chip); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; }
+.box { border-left: 4px solid var(--warn); background: var(--warn-bg); padding: 10px 14px; border-radius: 0 8px 8px 0; }
+.box b { color: var(--warn); }
+.tip { border-left: 4px solid var(--teal); background: var(--chip); padding: 10px 14px; border-radius: 0 8px 8px 0; }
+.tablewrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+td:first-child { white-space: nowrap; font-weight: 600; }
+.links { display: flex; flex-wrap: wrap; gap: 10px; }
+.links a { color: var(--ink); background: var(--chip); border: 1px solid var(--line); border-radius: 99px; padding: 7px 14px; text-decoration: none; font-weight: 600; font-size: 14px; }
+.links a:hover { border-color: var(--red); }
+a:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; }
+@media print {
+  :root { --bg: #fff; --paper: #fff; --ink: #111; --muted: #444; --line: #ccc; --chip: #f1f1f1; color-scheme: light; }
+  body { padding: 0; font-size: 11pt; }
+  .doc { border: 0; padding: 0; max-width: none; }
+  section { break-inside: auto; }
+  h2 { break-after: avoid; }
+  .box, .tip, table { break-inside: avoid; }
+  .links { display: none; }
+  @page { size: A4; margin: 16mm 15mm; }
+}
+</style>
+
+<div class="doc">
+  <header class="cover">
+    <div class="eyebrow">Mode d'emploi complet Â· version du 25/11/2026</div>
+    <h1>Ma Switch HomeNX<b>+</b></h1>
+    <p class="lead">Tout ce que fait ta console et comment t'en servir : dÃ©marrage, menu HOME, Claude, films et musique, jeux, outils en jeu, PC, Linux, secours et entretien.</p>
+    <div class="meta"><span>Switch V1 (AutoRCM)</span><span>Hekate 6.5.5</span><span>AtmosphÃ¨re 1.12.2</span><span>Firmware 23</span><span>emuMMC</span><span>HomeNX+ 0.9.3</span><span>Kubuntu</span></div>
+  </header>
+
+  <nav class="toc" aria-label="Sommaire">
+    <a href="#demarrer"><span>01</span>Allumer et choisir son systÃ¨me</a>
+    <a href="#home"><span>02</span>Le menu HOME de tous les jours</a>
+    <a href="#hnp"><span>03</span>HomeNX+ : le menu amÃ©liorÃ©</a>
+    <a href="#claude"><span>04</span>Claude sur la Switch</a>
+    <a href="#medias"><span>05</span>Films, sÃ©ries, musique</a>
+    <a href="#jeux"><span>06</span>Jeux et Ã©mulation</a>
+    <a href="#enjeu"><span>07</span>Pendant une partie : les overlays</a>
+    <a href="#pc"><span>08</span>Le compagnon PC</a>
+    <a href="#linux"><span>09</span>Linux (Kubuntu)</a>
+    <a href="#secours"><span>10</span>En cas de problÃ¨me</a>
+    <a href="#entretien"><span>11</span>Entretien et mises Ã  jour</a>
+    <a href="#touches"><span>12</span>Toutes les touches</a>
+  </nav>
+
+  <div class="links">
+    <a href="index.html">Accueil du dossier</a>
+    <a href="trailer.html">Voir le trailer</a>
+    <a href="ludotheque.html">Ouvrir ma LudothÃ¨que</a>
+    <a href="tournage.html">Tournage du vrai trailer</a>
+  </div>
+
+  <section id="demarrer">
+    <h2><span>01</span>Allumer et choisir son systÃ¨me</h2>
+    <p>Ta console est en <b>AutoRCM</b> : elle ne dÃ©marre jamais seule. Il faut lui envoyer Hekate depuis le PC.</p>
+    <ol>
+      <li>Branche la Switch Ã©teinte au ROG Ally avec un cÃ¢ble USB-C.</li>
+      <li>Ouvre <b>TegraRcmGUI</b>, choisis le payload <code>hekate_ctcaer_6.5.5.bin</code> (sur le Bureau), puis <b>Inject payload</b>.</li>
+      <li>Le menu <b>Hekate</b> s'affiche. Choisis :
+        <ul>
+          <li><b>HomeNX</b> : la console de tous les jours (emuMMC, AtmosphÃ¨re, ton menu HOME) ;</li>
+          <li><b>Linux (Kubuntu)</b> : le PC Linux de poche (chapitre 09) ;</li>
+          <li><b>AtmosphÃ¨re officiel</b> : le secours, avec le menu Nintendo d'origine.</li>
+        </ul>
+      </li>
+    </ol>
+    <p>Â« RedÃ©marrer Â» depuis la console renvoie directement au menu Hekate : pas besoin de rÃ©injecter.</p>
+    <div class="box"><b>Ã€ retenir :</b> ne laisse jamais la batterie se vider. Avec l'AutoRCM, une console vide oblige Ã  la rÃ©injecter depuis le PC. HomeNX+ prÃ©vient Ã  15 % puis Ã  8 %. PrÃ©fÃ¨re la veille Ã  Â« Ã‰teindre Â».</div>
+  </section>
+
+  <section id="home">
+    <h2><span>02</span>Le menu HOME de tous les jours</h2>
+    <p>Ton menu HOME est <b>HomeNX</b> en apparence <b>Cartes</b> (CardsNX) : une rangÃ©e de jaquettes, des pages et une barre en haut.</p>
+    <ul>
+      <li><kbd>ZL</kbd> / <kbd>ZR</kbd> : changer de page (Jeux, Homebrew, Nintendo, MÃ©dias, tes pages perso).</li>
+      <li><kbd>A</kbd> : lancer. <kbd>+</kbd> : options du jeu (dÃ©placer, renommer, masquer, fiche HomeNX+). <kbd>X</kbd> : fermer le jeu ouvert.</li>
+      <li><kbd>L</kbd> : Discord. <kbd>R</kbd> : rÃ©glages rapides. <kbd>âˆ’</kbd> : notifications.</li>
+      <li>Les <b>trois points</b> en haut Ã  gauche : pages, utilisateurs, musique, rÃ©glages, alimentation.</li>
+      <li><kbd>HOME</kbd> pendant le menu : ferme les fenÃªtres ouvertes, puis reprend le jeu en pause.</li>
+    </ul>
+  </section>
+
+  <section id="hnp">
+    <h2><span>03</span>HomeNX+ : le menu amÃ©liorÃ©</h2>
+    <p>HomeNX+ est ta version de HomeNX, avec tous les ajouts. Pour l'instant, il se lance comme une appli : <kbd>R</kbd> enfoncÃ© en lanÃ§ant un jeu, puis <b>HomeNX+</b> dans la liste du menu homebrew. Ton vrai menu HOME ne change pas tant que l'installation finale n'est pas faite.</p>
+    <h3>Ce qu'il ajoute</h3>
+    <ul>
+      <li><b>Panneau HomeNX+</b> : trois points &gt; HomeNX+, ou clic du stick gauche. Tout y est rangÃ©.</li>
+      <li><b>Style</b> : passer de l'apparence Cartes Ã  l'apparence Wii U (et retour par RÃ©glages &gt; HomeNX+). Le menu redÃ©marre en 2 secondes.</li>
+      <li><b>Recherche</b> : <kbd>Y</kbd>, ou tape une lettre sur un clavier USB. Une partie du nom suffit, accents ou pas.</li>
+      <li><b>Fiche de jeu</b> (<kbd>+</kbd> sur un jeu) : notes, checklist de complÃ©tion Ã  cocher, question Ã  Claude sur ce jeu, scÃ¨ne du jeu, copie des saves sur le PC.</li>
+      <li><b>ScÃ¨nes</b> : Nuit, Batterie, Perf max. Elles rÃ¨glent processeur, carte graphique, luminositÃ© et couleurs d'un coup. Une scÃ¨ne choisie pour un jeu s'applique Ã  son lancement et s'arrÃªte au retour au menu.</li>
+      <li><b>Pages intelligentes</b> : RÃ©cents, Plus jouÃ©s, Jamais lancÃ©s. <b>Ranger mes jeux avec Claude</b> : Claude propose des pages par genre, tu acceptes ou non.</li>
+      <li><b>Batterie et santÃ©</b> : batterie, place sur la carte SD, sys-clk, mode sans Ã©chec.</li>
+    </ul>
+    <div class="tip">Les rÃ©glages de la version de test sont rangÃ©s Ã  part (<code>config/homenxplus/</code>) : elle ne peut rien abÃ®mer dans ton menu installÃ©.</div>
+  </section>
+
+  <section id="claude">
+    <h2><span>04</span>Claude sur la Switch</h2>
+    <p>Claude est l'assistant d'Anthropic. Il marche avec <b>ta clÃ© API</b>, rangÃ©e seule dans <code>config/homenxplus/api_key.txt</code> (jamais affichÃ©e).</p>
+    <ul>
+      <li><b>Dans HomeNX+</b> : panneau &gt; Claude. Poser une question, Â« Que faire ici ? Â» sur ta derniÃ¨re capture d'Ã©cran, traduire une capture en franÃ§ais.</li>
+      <li><b>ClaudeNX</b> (appli Ã  part) : <kbd>A</kbd> poser une question, <kbd>ZR</kbd> joindre la derniÃ¨re capture, <kbd>Y</kbd> nouvelle conversation, <kbd>X</kbd> changer de modÃ¨le, <kbd>B</kbd> arrÃªter, <kbd>+</kbd> quitter.</li>
+      <li><b>Sous Linux</b> : Claude Code dans le terminal (commande <code>claude</code>).</li>
+    </ul>
+    <div class="box"><b>CoÃ»t :</b> chaque question coÃ»te quelques centimes. Le plafond du mois est dans <code>config/homenxplus/config.ini</code> (<code>monthly_cap_eur</code>) ; au-delÃ , Claude se bloque. Une capture n'est envoyÃ©e qu'aprÃ¨s ton Â« Oui Â».</div>
+  </section>
+
+  <section id="medias">
+    <h2><span>05</span>Films, sÃ©ries, musique</h2>
+    <p>Tout est sur la page <b>MÃ©dias</b> (<kbd>ZL</kbd> / <kbd>ZR</kbd>).</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Appli</th><th>Ã€ quoi elle sert</th></tr></thead>
+      <tbody>
+        <tr><td>SwitchWave</td><td>Tes films (jusqu'Ã  la 4K) depuis le PC, un disque rÃ©seau ou une clÃ© USB.</td></tr>
+        <tr><td>GMCA</td><td>Plex, Jellyfin, Emby et Stremio dans une seule appli.</td></tr>
+        <tr><td>Switchfin</td><td>Jellyfin.</td></tr>
+        <tr><td>Switch-NewPipe</td><td>YouTube, sans compte ni pub.</td></tr>
+        <tr><td>TsVitch</td><td>ChaÃ®nes de tÃ©lÃ© gratuites (IPTV).</td></tr>
+        <tr><td>NXMilk</td><td>Ta musique, avec des animations.</td></tr>
+        <tr><td>Discord</td><td>Le Discord intÃ©grÃ© Ã  HomeNX (aussi sur <kbd>L</kbd>).</td></tr>
+        <tr><td>Netflix, Disney+, Prime Video, Spotify</td><td>Par le PC : un appui rÃ©veille le PC, il ouvre le site, puis Moonlight l'affiche sur la Switch.</td></tr>
+        <tr><td>Jeux du PC</td><td>RÃ©veille le PC, puis Moonlight.</td></tr>
+      </tbody>
+    </table></div>
+    <h3>Pourquoi Netflix passe par le PC</h3>
+    <p>Ces services n'ont pas d'appli Switch et le navigateur de la console ne gÃ¨re pas leur protection anti-copie. Ã€ prÃ©parer une fois sur le PC : Sunshine (ou GeForce Experience) pour Moonlight, Moonlight jumelÃ© avec la Switch, le compagnon PC lancÃ© (chapitre 08) et une connexion Ã  chaque site dans le navigateur.</p>
+    <div class="tip">Image noire dans Moonlight ? Dans le navigateur du PC, dÃ©sactive l'accÃ©lÃ©ration matÃ©rielle (ParamÃ¨tres &gt; SystÃ¨me).</div>
+  </section>
+
+  <section id="jeux">
+    <h2><span>06</span>Jeux et Ã©mulation</h2>
+    <ul>
+      <li><b>Jeux Switch</b> : page Jeux du menu HOME.</li>
+      <li><b>tico</b> : Wii, GameCube et consoles rÃ©tro (NES Ã  N64, Game Boy, GBA). Les jeux Wii de plus de 4 Go sont en RVZ.</li>
+      <li><b>Cemu</b> : jeux Wii U.</li>
+      <li><b>Moonlight</b> : les jeux du PC sur la Switch.</li>
+    </ul>
+    <p>Ta liste complÃ¨te, avec ce qui est installÃ©, tÃ©lÃ©chargÃ© ou Ã  tÃ©lÃ©charger : <b>Ma LudothÃ¨que</b>.</p>
+  </section>
+
+  <section id="enjeu">
+    <h2><span>07</span>Pendant une partie : les overlays</h2>
+    <p>Ouvre le menu des overlays avec <kbd>L</kbd> + <kbd>â†“</kbd> + <kbd>R3</kbd> (Ultrahand).</p>
+    <ul>
+      <li><b>HomeNX+</b> : notes et checklist du jeu en cours (Ã  cocher), scÃ¨nes rapides, batterie.</li>
+      <li><b>sys-clk</b> : frÃ©quences. <b>Fizeau</b> : couleurs de l'Ã©cran. <b>FPSLocker</b> : images par seconde.</li>
+      <li><b>Status Monitor</b> : tempÃ©rature, batterie, charge. <b>EdiZon</b> : codes de triche.</li>
+      <li><b>Sysmodules</b> : allumer ou couper un module (ftpd, ChargeCap, key2conâ€¦).</li>
+    </ul>
+  </section>
+
+  <section id="pc">
+    <h2><span>08</span>Le compagnon PC</h2>
+    <p>Un petit programme sur le PC, sur le rÃ©seau de la maison seulement, protÃ©gÃ© par un jeton.</p>
+    <ol>
+      <li>Lance-le : <code>HomeNXPlus\pc_agent\lancer_pc_agent.ps1</code>.</li>
+      <li>La premiÃ¨re fois, carte SD dans le PC, lance <code>outils\installer_sur_sd.ps1</code> : il relie la Switch au PC.</li>
+    </ol>
+    <ul>
+      <li><b>RÃ©veiller le PC</b> Ã  distance (Wake-on-LAN activÃ© dans le BIOS du PC).</li>
+      <li><b>Copier tes saves et tes captures</b> dans <code>Documents\Switch_Sauvegardes\&lt;date&gt;</code>.</li>
+      <li><b>BoÃ®te aux lettres</b> : des messages entre la Switch et le PC.</li>
+      <li><b>Netflix et co</b> : ouverts sur le PC Ã  la demande de la Switch (liste fermÃ©e de 4 sites).</li>
+    </ul>
+  </section>
+
+  <section id="linux">
+    <h2><span>09</span>Linux (Kubuntu)</h2>
+    <p>Choisis <b>Linux (Kubuntu)</b> dans Hekate. Tu as un vrai bureau : Chromium, VLC, RetroArch, Dolphin, mGBA, et Claude Code dans le terminal.</p>
+    <ul>
+      <li>Outils HomeNX+ dans <code>switchroot/outils/homenxplus/</code> : rapport de santÃ©, boÃ®te aux lettres, icÃ´nes (<code>installer.sh</code>).</li>
+      <li>Pour revenir : redÃ©marre, tu retombes sur Hekate.</li>
+    </ul>
+  </section>
+
+  <section id="secours">
+    <h2><span>10</span>En cas de problÃ¨me</h2>
+    <h3>Le menu HOME ne dÃ©marre plus</h3>
+    <ol>
+      <li>Carte SD dans le PC : lance <code>secours_menu_home.ps1</code>. Il remet le menu Nintendo d'origine sans rien effacer.</li>
+      <li>Ou sous Linux : <code>bash switchroot/outils/homenxplus/secours_menu_home.sh</code>.</li>
+      <li>Ou dans Hekate : <b>AtmosphÃ¨re officiel</b>.</li>
+    </ol>
+    <h3>Autres cas</h3>
+    <ul>
+      <li><b>HomeNX+ plante 3 fois de suite</b> : il dÃ©marre tout seul en mode sans Ã©chec (sans verre, musique ni images en ligne).</li>
+      <li><b>Plus aucun jeu ne se lance</b> : vÃ©rifie que <code>config/sys-patch/config.ini</code> contient <code>patch_emummc=1</code>.</li>
+      <li><b>HomeNX+ se ferme au dÃ©marrage</b> : la raison exacte est notÃ©e dans <code>config/homenxplus/cards/start.log</code>.</li>
+      <li><b>Pour me montrer un souci</b> : remets la SD dans l'Ally ; les rapports sont dans <code>atmosphere/crash_reports</code>.</li>
+    </ul>
+  </section>
+
+  <section id="entretien">
+    <h2><span>11</span>Entretien et mises Ã  jour</h2>
+    <ul>
+      <li><b>Ajouter des applis</b> : ouvre la <a href="boutique.html">Boutique</a>, coche, tÃ©lÃ©charge ta liste, puis carte SD dans le PC : <code>.\boutique\installer_boutique.ps1 -Liste ma_liste_switch.json</code>.</li>
+      <li><b>Tout en une passe</b> : carte SD dans l'Ally, double-clic sur <b>Â« Switch - Tout mettre a jour Â»</b> (Bureau). Il vÃ©rifie la console, compile si besoin, installe HomeNX+ et les documents, rÃ©cupÃ¨re journaux, captures et rushes, puis affiche un bilan.</li>
+      <li><b>Installer une nouvelle version de HomeNX+</b> : carte SD dans le PC, <code>outils\installer_sur_sd.ps1</code>. Chaque changement est notÃ© dans <code>VERSIONS.txt</code> Ã  la racine de la carte.</li>
+      <li><b>Sauvegardes des jeux</b> : JKSV, ou la copie vers le PC (chapitre 08).</li>
+      <li><b>Firmware</b> : ne le mets jamais Ã  jour sans une version d'AtmosphÃ¨re qui le gÃ¨re.</li>
+      <li><b>En ligne</b> : 90DNS bloque les serveurs Nintendo. Ne les dÃ©bloque pas, ni l'eShop.</li>
+      <li><b>Filmer l'Ã©cran</b> (menu HOME compris) : <b>Switch Frame Tap</b> envoie l'image au PC ; <code>SwitchFrameTap.exe</code> enregistre en MP4 (<kbd>R</kbd>). Coupe-le ensuite dans Ultrahand &gt; Sysmodules.</li>
+      <li><b>Place</b> : environ 13 Go libres sur 512 Go. HomeNX+ et ses outils tiennent en moins de 60 Mo.</li>
+    </ul>
+  </section>
+
+  <section id="touches">
+    <h2><span>12</span>Toutes les touches</h2>
+    <div class="tablewrap"><table>
+      <thead><tr><th>OÃ¹</th><th>Touche</th><th>Effet</th></tr></thead>
+      <tbody>
+        <tr><td>Menu HOME</td><td><kbd>ZL</kbd> <kbd>ZR</kbd></td><td>Pages</td></tr>
+        <tr><td>Menu HOME</td><td><kbd>+</kbd></td><td>Options du jeu, fiche HomeNX+</td></tr>
+        <tr><td>Menu HOME</td><td><kbd>X</kbd></td><td>Fermer le jeu ouvert</td></tr>
+        <tr><td>Menu HOME</td><td><kbd>L</kbd> / <kbd>R</kbd> / <kbd>âˆ’</kbd></td><td>Discord / RÃ©glages rapides / Notifications</td></tr>
+        <tr><td>HomeNX+</td><td><kbd>Y</kbd></td><td>Rechercher un jeu</td></tr>
+        <tr><td>HomeNX+</td><td>Clic stick gauche</td><td>Panneau HomeNX+</td></tr>
+        <tr><td>En jeu</td><td><kbd>L</kbd> + <kbd>â†“</kbd> + <kbd>R3</kbd></td><td>Overlays (Ultrahand)</td></tr>
+        <tr><td>Menu homebrew</td><td><kbd>R</kbd> + lancer un jeu</td><td>Menu homebrew avec toute la mÃ©moire</td></tr>
+        <tr><td>ClaudeNX</td><td><kbd>A</kbd> <kbd>ZR</kbd> <kbd>Y</kbd> <kbd>X</kbd> <kbd>B</kbd> <kbd>+</kbd></td><td>Question, capture, nouvelle conversation, modÃ¨le, arrÃªter, quitter</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <footer>HomeNX+ est un logiciel libre (GPL-3.0), d'aprÃ¨s HomeNX (ad3333m) et SwitchU (PoloNX). Aucune clÃ©, aucun firmware ni aucun jeu n'est fourni. Les noms de services citÃ©s appartiennent Ã  leurs propriÃ©taires.</footer>
+</div>

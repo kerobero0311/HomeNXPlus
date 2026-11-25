@@ -86,3 +86,10 @@
 - Paquet de diffusion : outils\creer_release.ps1 (zip SD + PC + guide, SHA-256, garde-fou contre les données personnelles).
 - Tests et documents : adresse IP locale remplacée par une adresse d'exemple.
 - Tout en une passe : outils\tout_en_une_passe.ps1 (+ raccourci « Switch - Tout mettre a jour » sur le Bureau) : santé de la console, compilation si besoin, installation, documents, journaux, captures et rushes, bilan.
+
+## 0.9.4 (25/11/2026)
+- Mise à jour de HomeNX+ depuis l'appli (panneau > Mettre à jour HomeNX+, depuis les versions GitHub, .nro vérifié).
+- Assistant de premier lancement (style, Claude, PC, raccourcis).
+- Statistiques de jeu ; captures du jeu dans sa fiche ; Claude : choisir ce qu'on joint (jeu, notes, capture) ; thème nuit automatique.
+- 16 services par le PC ; boutique d'applis (35 applis) et son installeur ; publication GitHub et site.
+- FEUILLE_DE_ROUTE.md (état des 50 choix), promo/textes_diffusion.md.

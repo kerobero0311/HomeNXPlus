@@ -16,6 +16,7 @@
 #include "hnp/safemode.hpp"
 #include "hnp/scenes.hpp"
 #include "hnp/services.hpp"
+#include "hnp/update.hpp"
 #include "hnp/switch_actions.hpp"
 #include "hnp/switch_games.hpp"
 #include "libclaude/claude.hpp"
@@ -44,7 +45,10 @@ constexpr const char* kPcFile     = "sdmc:/config/homenxplus/pc_agent.ini";
 constexpr const char* kClaudeNro  = "sdmc:/switch/ClaudeNX/ClaudeNX.nro";
 constexpr const char* kSelfNro    = "sdmc:/switch/HomeNXPlus/HomeNXPlus.nro";  // le .nro de test
 constexpr const char* kStyleFile  = HNP_CFG_SWITCHU "/frontend.txt";
-constexpr const char* kVersion    = "HomeNX+ 0.9.3";
+constexpr const char* kVersion    = "HomeNX+ 0.9.4";
+constexpr const char* kVersionNum = "0.9.4";
+constexpr const char* kWelcomeDone = "sdmc:/config/homenxplus/assistant_fait";
+constexpr const char* kNightAuto  = "sdmc:/config/homenxplus/theme_nuit_auto";
 constexpr const char* kSceneAuto  = "sdmc:/homenxplus/scene_auto.txt";  // scene posee au lancement d'un jeu
 
 std::string readAll(const std::string& p) {
@@ -150,6 +154,7 @@ void CardsActivity::hnpPoll() {
     if (!m_hnpStarted) { // une scene appliquee au lancement d'un jeu s'arrete au retour au menu
         m_hnpStarted = true;
         std::error_code ec;
+        if (!std::filesystem::exists(kWelcomeDone, ec)) openHnpWelcome();
 #ifdef SWITCHU_MENU
         const bool gameOpen = runningId() != 0;
 #else
@@ -163,6 +168,19 @@ void CardsActivity::hnpPoll() {
                 saveScenes(x);
                 return hnp::clearScene();
             }, false);
+        }
+    }
+    // Thème nuit automatique : verre sombre de 20 h à 7 h, celui du jour le reste du temps
+    if (now - m_hnpNightTick > armNsToTicks(60'000'000'000ULL) || !m_hnpNightTick) {
+        m_hnpNightTick = now;
+        std::error_code ec;
+        if (std::filesystem::exists(kNightAuto, ec)) {
+            std::time_t t = std::time(nullptr);
+            const int h = std::localtime(&t)->tm_hour;
+            const bool night = h >= 20 || h < 7;
+            if (m_hnpDayGlass < 0) m_hnpDayGlass = m_settings.glass == 2 ? 1 : m_settings.glass;
+            const int want = night ? 2 : m_hnpDayGlass;
+            if (m_settings.glass != want) { m_settings.glass = want; app().requestRedraw(); }
         }
     }
     // Garde batterie (AutoRCM) : une alerte a 15 % puis a 8 %, toutes les 30 s au plus
@@ -263,7 +281,11 @@ void CardsActivity::openHnpClaude() {
     if (!key) {
         items.push_back(action("Comment l'installer", [this]() { openReader("Clé API Claude", kNoKey, "news"); }));
     } else {
-        MenuItem ask = action("Poser une question", [this]() {
+        MenuItem ask = action("Poser une question", [this]() { openHnpAsk(); });
+        ask.detail = "Tu choisis ce que tu joins : jeu, notes, capture";
+        ask.glyph = "news";
+        items.push_back(std::move(ask));
+        MenuItem askSimple = action("Question rapide (sans rien joindre)", [this]() {
             askText("Question pour Claude", "Écris ta question", "", 500, [this](const std::string& q) {
                 if (q.find_first_not_of(" \r\n\t") == std::string::npos) return;
                 hnpRun("Claude réfléchit...", "Claude", [q]() {
@@ -273,9 +295,9 @@ void CardsActivity::openHnpClaude() {
                 }, true);
             });
         });
-        ask.detail = "La réponse s'affiche ici (quelques centimes au plus)";
-        ask.glyph = "news";
-        items.push_back(std::move(ask));
+        askSimple.detail = "La réponse s'affiche ici (quelques centimes au plus)";
+        askSimple.glyph = "news";
+        items.push_back(std::move(askSimple));
         MenuItem help = action("Que faire ici ? (dernière capture)", [this]() {
             openMenu("Envoyer ta dernière capture à Claude ?", {
                 info("Seule la dernière capture de l'Album part", [] { return std::string(); }),
@@ -410,6 +432,9 @@ void CardsActivity::openHnpGame(std::uint64_t id, const std::string& name) {
         ask.glyph = "friends";
         items.push_back(std::move(ask));
     }
+    MenuItem gal = action("Mes captures de ce jeu", [this, id, name]() { openHnpGallery(id, name); });
+    gal.glyph = "sys_album";
+    items.push_back(std::move(gal));
     const hnp::PcLink pc = pcLink();
     if (pc.configured()) {
         MenuItem saves = action("Copier ses saves sur le PC", [this, pc, id, name]() {
@@ -557,6 +582,148 @@ void CardsActivity::hnpPlayPc() {
         if (r.size() > 1) say(r.substr(1));
         openNro(moon);
     });
+}
+
+// ---------------------------------------------------------------- premiers pas, statistiques, mise à jour, galerie, Claude avec contexte
+
+void CardsActivity::openHnpWelcome() {
+    std::error_code ec;
+    std::filesystem::create_directories("sdmc:/config/homenxplus", ec);
+    std::ofstream(kWelcomeDone) << "1";  // une seule fois : « Revoir l'accueil » dans le panneau
+    std::vector<MenuItem> items;
+    items.push_back(info("Bienvenue dans HomeNX+ !", [] { return std::string(); }));
+    MenuItem a = action("1. Choisir l'apparence", [this]() { openHnpStyle(); });
+    a.detail = "Cartes (celle-ci) ou Wii U ; tu pourras changer quand tu veux";
+    a.glyph = "copy";
+    items.push_back(std::move(a));
+    MenuItem b = action("2. Claude (facultatif)", [this]() {
+        openReader("Claude", hasKey() ? "Ta clé API est en place : panneau HomeNX+ > Claude." : kNoKey, "news");
+    });
+    b.detail = hasKey() ? "Clé en place" : "Il faut ta propre clé API (quelques euros par mois au plus)";
+    b.glyph = "news";
+    items.push_back(std::move(b));
+    MenuItem c = action("3. Relier le PC (facultatif)", [this]() { openHnpPc(); });
+    c.detail = "Réveil du PC, sauvegardes, Netflix & co par Moonlight";
+    c.glyph = "wifi";
+    items.push_back(std::move(c));
+    MenuItem d = action("4. Les raccourcis", [this]() {
+        openReader("Raccourcis HomeNX+", "Y : rechercher un jeu (ou tape une lettre au clavier USB).\n"
+                   "Clic du stick gauche : panneau HomeNX+.\n+ sur un jeu : fiche (notes, checklist, captures, scène).\n"
+                   "ZL / ZR : pages, dont Médias (films, séries, musique).\nEn jeu : L + ↓ + R3 pour les overlays.", "dots");
+    });
+    d.glyph = "dots";
+    items.push_back(std::move(d));
+    items.push_back(action("C'est parti", [] {}));
+    openMenu("Premiers pas", std::move(items));
+}
+
+void CardsActivity::openHnpStats() {
+    std::vector<const Game*> games;
+    std::uint64_t total = 0, launches = 0;
+    int never = 0;
+    for (const Game& g : m_pages[kGames]) {
+        if (!g.path.empty() || !g.action.empty() || g.homebrew) continue;
+        games.push_back(&g);
+        total += g.playSeconds;
+        launches += g.launches;
+        if (!g.lastPlayed) ++never;
+    }
+    if (games.empty()) { say("Aucun jeu à compter."); return; }
+    auto hm = [](std::uint64_t s) { return std::to_string(s / 3600) + " h " + (s % 3600 / 60 < 10 ? "0" : "") + std::to_string(s % 3600 / 60); };
+    std::string t = std::to_string(games.size()) + " jeux · " + hm(total) + " de jeu au total · " + std::to_string(launches) + " lancements\n"
+                    + std::to_string(never) + " jeu(x) jamais lancé(s)\n\nLes plus joués\n";
+    std::sort(games.begin(), games.end(), [](const Game* a, const Game* b) { return a->playSeconds > b->playSeconds; });
+    for (size_t i = 0; i < games.size() && i < 10; ++i) {
+        const int pct = total ? static_cast<int>(games[i]->playSeconds * 100 / total) : 0;
+        t += std::to_string(i + 1) + ". " + games[i]->name + " : " + hm(games[i]->playSeconds) + " (" + std::to_string(pct) + " %)\n";
+    }
+    std::sort(games.begin(), games.end(), [](const Game* a, const Game* b) { return a->lastPlayed > b->lastPlayed; });
+    t += "\nJoués récemment\n";
+    for (size_t i = 0; i < games.size() && i < 5 && games[i]->lastPlayed; ++i) {
+        std::time_t lp = static_cast<std::time_t>(games[i]->lastPlayed);
+        char b[32];
+        std::strftime(b, sizeof b, "%d/%m/%Y", std::localtime(&lp));
+        t += std::string("- ") + games[i]->name + " (" + b + ")\n";
+    }
+    openReader("Statistiques de jeu", t, "trophy");
+}
+
+void CardsActivity::hnpCheckUpdate() {
+    hnpRun("Recherche d'une mise à jour...", "", []() {
+        const hnp::UpdateInfo u = hnp::checkUpdate();
+        if (!u.ok) return "0" + u.error;
+        if (hnp::compareVersions(u.version, kVersionNum) <= 0) return std::string("0HomeNX+ est à jour (") + kVersionNum + ").";
+        if (u.url.empty()) return "0La version " + u.version + " existe mais sans fichier HomeNXPlus.nro.";
+        return "1" + u.version + "\n" + u.url + "\n" + u.notes;
+    }, false, [this](const std::string& r) {
+        if (r.empty() || r[0] != '1') { say(r.size() > 1 ? r.substr(1) : std::string("Échec.")); return; }
+        const size_t a = r.find('\n'), b = r.find('\n', a + 1);
+        const std::string ver = r.substr(1, a - 1), url = r.substr(a + 1, b - a - 1), notes = b == std::string::npos ? "" : r.substr(b + 1);
+        MenuItem go = action("Installer la version " + ver, [this, url]() {
+            hnpRun("Téléchargement de la mise à jour...", "", [url]() {
+                std::string msg;
+                hnp::downloadNro(url, "sdmc:/switch/HomeNXPlus/HomeNXPlus.nro", msg);
+                return msg;
+            }, false);
+        });
+        go.glyph = "download";
+        MenuItem what = action("Nouveautés", [this, ver, notes]() { openReader("HomeNX+ " + ver, notes.empty() ? "Pas de notes." : notes, "news"); });
+        what.glyph = "news";
+        openMenu("Mise à jour disponible : " + ver, {std::move(go), std::move(what), action("Plus tard", [] {})});
+    });
+}
+
+void CardsActivity::openHnpGallery(std::uint64_t id, const std::string& name) {
+    hnpRun("Lecture de l'Album...", "Captures : " + name, [id]() {
+        const auto l = hnp::capturesOfGame(id, 40);
+        if (l.empty()) return std::string("Aucune capture de ce jeu.\nEn jeu : appui court sur Capture pour une photo, appui long pour les 30 dernières secondes en vidéo.");
+        std::string t = std::to_string(l.size()) + " capture(s), les plus récentes d'abord :\n\n";
+        for (const auto& s : l) t += s + "\n";
+        t += "\nPour les voir en grand : Album. Pour les copier sur le PC : panneau HomeNX+ > PC > Envoyer mes captures.";
+        return t;
+    }, true);
+}
+
+void CardsActivity::openHnpAsk() {
+    if (!hasKey()) { openReader("Claude", kNoKey, "news"); return; }
+    struct Ctx { bool game = true, notes = false, shot = false; };
+    auto ctx = std::make_shared<Ctx>();
+    const Game* g = current();
+    const bool isGame = g && g->path.empty() && g->action.empty() && !g->homebrew;
+    const std::uint64_t gid = isGame ? g->id : 0;
+    const std::string gname = isGame ? g->name : std::string();
+    std::vector<MenuItem> items;
+    if (isGame) {
+        items.push_back(toggle("Joindre le jeu : " + gname, [ctx] { return ctx->game; }, [ctx]() { ctx->game = !ctx->game; }));
+        items.push_back(toggle("Joindre mes notes de ce jeu", [ctx] { return ctx->notes; }, [ctx]() { ctx->notes = !ctx->notes; }));
+    }
+    items.push_back(toggle("Joindre ma dernière capture", [ctx] { return ctx->shot; }, [ctx]() { ctx->shot = !ctx->shot; },
+                           "Elle part seulement avec cette question"));
+    MenuItem write = action("Écrire ma question", [this, ctx, gid, gname]() {
+        askText("Question pour Claude", "Écris ta question", "", 500, [this, ctx, gid, gname](const std::string& q) {
+            if (q.find_first_not_of(" \r\n\t") == std::string::npos) return;
+            std::string prompt;
+            if (ctx->game && gid) prompt += "Je joue à « " + gname + " » sur Nintendo Switch. ";
+            if (ctx->notes && gid) {
+                const hnp::GameNotes n = loadNotes(hex(gid));
+                if (!n.text.empty()) prompt += "Mes notes sur ce jeu :\n" + n.text.substr(0, 3000) + "\n\n";
+            }
+            prompt += q;
+            const bool shot = ctx->shot;
+            hnpRun("Claude réfléchit...", "Claude", [prompt, q, shot]() {
+                std::string out;
+                std::vector<std::uint8_t> jpeg;
+                std::string when;
+                if (shot && !hnp::lastScreenshot(jpeg, when)) return std::string("Aucune capture dans l'Album : décoche « capture » ou prends-en une.");
+                hnp::askClaudeOnce(prompt, out, 1500, shot ? &jpeg : nullptr);
+                return "Toi : " + q + (shot ? "\n(capture du " + when + " jointe)" : std::string()) + "\n\n" + out;
+            }, true);
+        });
+    });
+    write.glyph = "news";
+    items.push_back(std::move(write));
+    items.push_back(action("Annuler", [] {}));
+    openMenu("Ta question à Claude", std::move(items));
 }
 
 // ---------------------------------------------------------------- recherche (Y, clavier USB)
@@ -882,6 +1049,29 @@ void CardsActivity::openHnp() {
     smart.detail = "Récents, Plus joués, Jamais lancés : mises à jour à chaque appui";
     smart.glyph = "sort";
     items.push_back(std::move(smart));
+    MenuItem stats = action("Statistiques de jeu", [this]() { openHnpStats(); });
+    stats.glyph = "trophy";
+    items.push_back(std::move(stats));
+    MenuItem night = toggle("Thème nuit automatique", [] { std::error_code ec; return std::filesystem::exists(kNightAuto, ec); },
+        [this]() {
+            std::error_code ec;
+            if (std::filesystem::exists(kNightAuto, ec)) {
+                std::filesystem::remove(kNightAuto, ec);
+                if (m_hnpDayGlass >= 0) { m_settings.glass = m_hnpDayGlass; m_hnpDayGlass = -1; }
+            } else {
+                std::filesystem::create_directories("sdmc:/config/homenxplus", ec);
+                std::ofstream(kNightAuto) << "1";
+                m_hnpNightTick = 0;
+            }
+        }, "Verre sombre de 20 h à 7 h");
+    items.push_back(std::move(night));
+    MenuItem upd = action("Mettre à jour HomeNX+", [this]() { hnpCheckUpdate(); });
+    upd.detail = std::string("Version installée : ") + kVersionNum;
+    upd.glyph = "download";
+    items.push_back(std::move(upd));
+    MenuItem welcome = action("Revoir l'accueil (premiers pas)", [this]() { openHnpWelcome(); });
+    welcome.glyph = "home";
+    items.push_back(std::move(welcome));
     MenuItem health = action("Batterie et santé", [this]() {
         const hnp::BatteryStatus b = hnp::readBattery();
         std::string t = "Batterie : " + (b.percent < 0 ? std::string("inconnue") : std::to_string(b.percent) + " %") +

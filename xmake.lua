@@ -193,7 +193,7 @@ target("SwitchU")
     add_includedirs("projects/menu/src", {public = false})
     add_files("projects/menu/src/**.cpp")
     -- HomeNX+ : rangement, scenes, Claude (logique) et actions console
-    add_files("projects/homenxplus/src/layout/*.cpp", "projects/homenxplus/src/scenes/*.cpp", "projects/homenxplus/src/claude/*.cpp", "projects/homenxplus/src/safemode/*.cpp", "projects/homenxplus/src/pc/*.cpp", "projects/homenxplus/src/notes/*.cpp", "projects/homenxplus/src/switch/actions.cpp", "projects/homenxplus/src/switch/pc_actions.cpp", "projects/homenxplus/src/switch/games.cpp", "projects/homenxplus/src/switch/claude_tasks.cpp", "projects/homenxplus/src/switch/client.cpp")
+    add_files("projects/homenxplus/src/layout/*.cpp", "projects/homenxplus/src/scenes/*.cpp", "projects/homenxplus/src/claude/*.cpp", "projects/homenxplus/src/safemode/*.cpp", "projects/homenxplus/src/pc/*.cpp", "projects/homenxplus/src/notes/*.cpp", "projects/homenxplus/src/switch/actions.cpp", "projects/homenxplus/src/switch/pc_actions.cpp", "projects/homenxplus/src/switch/games.cpp", "projects/homenxplus/src/switch/claude_tasks.cpp", "projects/homenxplus/src/switch/client.cpp", "projects/homenxplus/src/switch/update.cpp")
     add_includedirs("projects/homenxplus/include", {public = false})
     add_defines("HNP_PLUS")  -- HomeNX+ : ajouts dans l'apparence Cartes (CardsActivity)
     -- HomeNX Discord panel: SwitchCord's client code uses yyjson (C) and mbedtls.
