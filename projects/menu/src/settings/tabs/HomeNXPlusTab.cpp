@@ -8,6 +8,7 @@
 #include "hnp/pclink.hpp"
 #include "hnp/safemode.hpp"
 #include "hnp/scenes.hpp"
+#include "hnp/services.hpp"
 #include "hnp/switch_actions.hpp"
 #include "libclaude/claude.hpp"
 
@@ -299,15 +300,14 @@ SettingsScreen::Tab settings::tabs::HomeNXPlusTab::build(SettingsScreen& screen)
     // ------------------------------------------------------------ A propos
     // ------------------------------------------------------------ PC (pc_agent + Wake-on-LAN)
     // ------------------------------------------------------------ Médias (comme la page Médias des Cartes)
-    section("Médias : Netflix, Disney+, Prime Video, Spotify");
+    section("Médias : films, séries et musique par le PC");
     {
         const hnp::PcLink pc = hnp::parsePcLink(readAll("sdmc:/config/homenxplus/pc_agent.ini"));
         std::error_code ec;
         std::string moon = "sdmc:/switch/Moonlight/Moonlight-Switch.nro";
         if (!std::filesystem::exists(moon, ec)) moon.clear();
-        const std::pair<const char*, const char*> kServices[] = {
-            {"netflix", "Netflix"}, {"disney", "Disney+"}, {"prime", "Prime Video"}, {"spotify", "Spotify"}};
-        for (const auto& [id, name] : kServices) {
+        for (const hnp::StreamingService& svc : hnp::kStreamingServices) {
+            const char* id = svc.id; const char* name = svc.name;
             SettingItem it;
             it.label = name;
             it.buttonLabel = "Regarder";

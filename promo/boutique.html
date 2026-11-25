@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="fr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Boutique Switch</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700&family=Manrope:wght@400;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+/* Mise en page : une boutique ; filtres et panier collants en haut, puis une grille de fiches par rayon, puis « comment ça marche ». */
+:root {
+  --bg: #f4f5f8; --panel: #ffffff; --ink: #151821; --muted: #5c6374; --line: #dde1e9; --chip: #edf0f5;
+  --accent: #e2402f; --accent-ink: #ffffff; --ok: #12875d; --ok-soft: #e1f3eb; --warn: #a65f00; --warn-soft: #fcefd9;
+  --display: "Unbounded", "Arial Black", system-ui, sans-serif; --body: "Manrope", "Segoe UI", system-ui, sans-serif; --mono: "JetBrains Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0d0f15; --panel: #161a24; --ink: #eef1f7; --muted: #9aa2b4; --line: #282d3a; --chip: #20242f;
+  --accent: #ff5a4a; --accent-ink: #14161c; --ok: #3fd39a; --ok-soft: #12301f; --warn: #ffb64a; --warn-soft: #33250f; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0d0f15; --panel: #161a24; --ink: #eef1f7; --muted: #9aa2b4; --line: #282d3a; --chip: #20242f;
+  --accent: #ff5a4a; --accent-ink: #14161c; --ok: #3fd39a; --ok-soft: #12301f; --warn: #ffb64a; --warn-soft: #33250f; color-scheme: dark }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 64px; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 1040px; margin: 0 auto; display: grid; gap: 22px; padding-top: 26px; }
+header { display: grid; gap: 8px; }
+.eyebrow { font: 600 12px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+h1 { font: 700 clamp(28px, 5.4vw, 44px)/1.05 var(--display); margin: 0; text-wrap: balance; }
+.lead { color: var(--muted); margin: 0; max-width: 64ch; }
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding: 10px 0; border-bottom: 1px solid var(--line); display: grid; gap: 10px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.search { flex: 1 1 220px; min-width: 0; font: 15px var(--body); color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; }
+.rayons { display: flex; flex-wrap: wrap; gap: 6px; }
+.rayons button { font: 600 13px var(--body); color: var(--muted); background: var(--panel); border: 1px solid var(--line); border-radius: 99px; padding: 6px 12px; cursor: pointer; }
+.rayons button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.cart { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; }
+.cart b { font-family: var(--display); font-weight: 600; }
+.cart .sum { font: 600 13px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn { font: 700 14px var(--body); background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 10px; padding: 9px 14px; cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.save { font-size: 13px; color: var(--muted); }
+.save.err { color: var(--accent); }
+section.rayon { display: grid; gap: 10px; }
+h2 { font: 600 19px var(--display); margin: 6px 0 0; }
+.rtext { margin: 0; color: var(--muted); font-size: 14px; max-width: 70ch; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+label.card { position: relative; display: grid; grid-template-rows: auto 1fr auto; gap: 6px; background: var(--panel); border: 1.5px solid var(--line); border-radius: 14px; padding: 14px; cursor: pointer; min-width: 0; transition: border-color .12s, transform .12s; }
+label.card:hover { transform: translateY(-1px); border-color: var(--muted); }
+label.card.on { border-color: var(--ok); background: linear-gradient(0deg, var(--ok-soft), var(--panel) 70%); }
+label.card input { position: absolute; top: 14px; right: 14px; width: 20px; height: 20px; accent-color: var(--ok); }
+.cname { font-weight: 700; font-size: 16px; padding-right: 30px; }
+.ctext { color: var(--muted); font-size: 13.5px; }
+.badges { display: flex; flex-wrap: wrap; gap: 5px; }
+.badge { font: 600 10.5px var(--mono); letter-spacing: .05em; text-transform: uppercase; border-radius: 99px; padding: 2px 8px; background: var(--chip); color: var(--muted); }
+.badge.reco { background: var(--accent); color: var(--accent-ink); }
+.badge.mod { background: var(--warn-soft); color: var(--warn); }
+label.card:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+.how { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; display: grid; gap: 8px; }
+.how ol { margin: 0; padding-left: 22px; display: grid; gap: 4px; }
+code { font: .88em var(--mono); background: var(--chip); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; overflow-wrap: anywhere; }
+.foot { color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); padding-top: 12px; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { label.card { transition: none; } label.card:hover { transform: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Boutique HomeNX+ · applis libres pour Switch modifiée</div>
+    <h1>Coche, et c'est installé.</h1>
+    <p class="lead">Choisis tes applis comme dans un magasin. Ta liste s'enregistre ; ensuite, carte SD dans le PC, l'installeur télécharge chaque appli depuis sa page officielle et la range au bon endroit.</p>
+  </header>
+
+  <div class="bar">
+    <div class="row">
+      <input class="search" id="q" type="search" placeholder="Chercher une appli (films, manettes, sauvegarde…)" aria-label="Chercher une appli">
+      <div class="rayons" id="rayons" role="group" aria-label="Rayons"></div>
+    </div>
+    <div class="cart" aria-live="polite">
+      <div><b id="nb">Panier vide</b> <span class="sum" id="sum"></span></div>
+      <div class="btns">
+        <button type="button" class="btn ghost" id="pack">Pack débutant</button>
+        <button type="button" class="btn ghost" id="vider">Vider</button>
+        <button type="button" class="btn" id="export">Télécharger ma liste</button>
+      </div>
+      <div class="save" id="save"></div>
+    </div>
+  </div>
+
+  <div id="rayonsListe"></div>
+
+  <section class="how">
+    <h2>Comment ça marche</h2>
+    <ol>
+      <li>Coche tes applis. Le <b>Pack débutant</b> coche les essentielles.</li>
+      <li><b>Télécharge ta liste</b> (<code>ma_liste_switch.json</code>), ou dis simplement à Claude « ma liste est prête ».</li>
+      <li>Carte SD de la Switch dans le PC, puis : <code>.\boutique\installer_boutique.ps1 -Liste ma_liste_switch.json</code></li>
+      <li>Remets la carte dans la Switch. Les modules marqués « en arrière-plan » s'allument dans Ultrahand &gt; Sysmodules.</li>
+    </ol>
+    <p class="rtext">L'installeur ne touche jamais au menu HOME, à Hekate ni aux réglages d'Atmosphère, et n'écrase rien de ce qui est déjà sur la carte.</p>
+  </section>
+
+  <p class="foot">Toutes ces applis sont libres et viennent de leur page GitHub officielle. Aucune clé, aucun firmware, aucun jeu, aucun installeur de jeux n'est proposé. Il faut une Switch déjà modifiée (Atmosphère).</p>
+</div>
+
+<script>
+const CAT = {"version": "2026-11-25", "note": "Catalogue de la boutique HomeNX+. Chaque appli vient de sa page GitHub officielle (derniere version publiee). Ni installeur de jeux, ni patch de signature, ni cles, ni firmware.", "categories": [{"id": "films", "nom": "Films et séries", "texte": "Regarder des films, des séries et des vidéos sur la Switch."}, {"id": "musique", "nom": "Musique", "texte": "Écouter ta musique, même pendant les jeux."}, {"id": "jeux", "nom": "Jouer plus", "texte": "Jouer aux jeux du PC sur la Switch."}, {"id": "enjeu", "nom": "Outils en jeu (overlays)", "texte": "Des menus par-dessus les jeux : L + ↓ + R3. Il faut d'abord la base nx-ovlloader et Ultrahand."}, {"id": "outils", "nom": "Outils pratiques", "texte": "Sauvegardes, fichiers, transferts, mises à jour."}, {"id": "manettes", "nom": "Manettes et réseau", "texte": "Manettes d'autres consoles, jeu local à plusieurs."}, {"id": "homenx", "nom": "HomeNX+ et Claude", "texte": "Le menu HOME amélioré et l'assistant Claude."}], "applis": [{"id": "switchwave", "nom": "SwitchWave", "cat": "films", "texte": "Lecteur vidéo très fluide (jusqu'à la 4K) : tes films sur la carte, une clé USB ou le PC.", "depot": "averne/SwitchWave", "fichier": "^SwitchWave-.*\\.zip$", "type": "zip", "dossier": "SwitchWave", "licence": "GPL-3.0", "recommande": true}, {"id": "gmca", "nom": "GMCA", "cat": "films", "texte": "Plex, Jellyfin, Emby et Stremio dans une seule appli.", "depot": "thcolin/pleNx", "fichier": "^GMCA\\.nro$", "type": "nro", "dossier": "GMCA", "licence": "Apache-2.0", "recommande": true}, {"id": "switchfin", "nom": "Switchfin", "cat": "films", "texte": "Client Jellyfin : tes films du PC avec jaquettes et reprise.", "depot": "dragonflylee/switchfin", "fichier": "^Switchfin\\.nro$", "type": "nro", "dossier": "Switchfin", "licence": "Apache-2.0"}, {"id": "newpipe", "nom": "Switch-NewPipe", "cat": "films", "texte": "YouTube sans compte ni publicité.", "depot": "mirusu400/Switch-NewPipe", "fichier": "^switch_newpipe\\.nro$", "type": "nro", "dossier": "Switch-NewPipe", "licence": "GPL-3.0", "recommande": true}, {"id": "tsvitch", "nom": "TsVitch", "cat": "films", "texte": "Chaînes de télé gratuites en direct (listes IPTV).", "depot": "giovannimirulla/TsVitch", "fichier": "^TsVitch\\.nro$", "type": "nro", "dossier": "TsVitch", "licence": "GPL-3.0"}, {"id": "wiliwili", "nom": "wiliwili", "cat": "films", "texte": "Bilibili (vidéos et animés), plutôt en chinois.", "depot": "xfangfang/wiliwili", "fichier": "^wiliwili-NintendoSwitch\\.zip$", "type": "zip", "dossier": "wiliwili", "licence": "GPL-3.0"}, {"id": "nxmp", "nom": "NXMP", "cat": "films", "texte": "Autre lecteur vidéo (réseau SMB, FTP, HTTP). SwitchWave suffit en général.", "depot": "proconsule/nxmp", "fichier": "^nxmp-.*\\.zip$", "type": "zip", "dossier": "nxmp", "licence": "GPL-3.0"}, {"id": "nxmilk", "nom": "NXMilk", "cat": "musique", "texte": "Ta musique (SD, USB, réseau) avec des animations.", "depot": "proconsule/NXMilk", "fichier": "^NXMilk-.*\\.zip$", "type": "zip", "dossier": "NXMilk", "licence": "GPL-3.0", "recommande": true}, {"id": "systune", "nom": "sys-tune", "cat": "musique", "texte": "Ta musique en fond pendant les jeux, réglée depuis un overlay.", "depot": "HookedBehemoth/sys-tune", "fichier": "^sys-tune-.*\\.zip$", "type": "zip", "dossier": "sys-tune", "licence": "GPL-2.0", "module": true}, {"id": "moonlight", "nom": "Moonlight", "cat": "jeux", "texte": "Les jeux du PC sur la Switch (avec Sunshine sur le PC). Sert aussi pour Netflix & co par le PC.", "depot": "XITRIX/Moonlight-Switch", "fichier": "^Moonlight-Switch\\.nro$", "type": "nro", "dossier": "Moonlight", "licence": "GPL-3.0", "recommande": true}, {"id": "ovlloader", "nom": "nx-ovlloader (base des overlays)", "cat": "enjeu", "texte": "Indispensable pour tous les outils en jeu.", "depot": "WerWolv/nx-ovlloader", "fichier": "^nx-ovlloader\\.zip$", "type": "zip", "dossier": "nx-ovlloader", "licence": "ISC", "module": true, "demarrage": true, "recommande": true}, {"id": "ultrahand", "nom": "Ultrahand", "cat": "enjeu", "texte": "Le menu des overlays (L + ↓ + R3), en français.", "depot": "ppkantorski/Ultrahand-Overlay", "fichier": "^sdout\\.zip$", "type": "zip", "dossier": "Ultrahand", "licence": "GPL-2.0", "recommande": true}, {"id": "sysclk", "nom": "sys-clk", "cat": "enjeu", "texte": "Régler la vitesse du processeur (batterie ou performance).", "depot": "retronx-team/sys-clk", "fichier": "^sys-clk-.*\\.zip$", "type": "zip", "dossier": "sys-clk", "licence": "libre", "module": true}, {"id": "fizeau", "nom": "Fizeau", "cat": "enjeu", "texte": "Couleurs de l'écran, filtre de lumière bleue le soir.", "depot": "averne/Fizeau", "fichier": "^Fizeau-.*\\.zip$", "type": "zip", "dossier": "Fizeau", "licence": "GPL-2.0", "module": true}, {"id": "statusmon", "nom": "Status Monitor", "cat": "enjeu", "texte": "Température, batterie, images par seconde à l'écran.", "depot": "masagrator/Status-Monitor-Overlay", "fichier": "^Status-Monitor-Overlay\\.zip$", "type": "zip", "dossier": "Status-Monitor", "licence": "GPL-2.0", "recommande": true}, {"id": "fpslocker", "nom": "FPSLocker", "cat": "enjeu", "texte": "Choisir les images par seconde d'un jeu.", "depot": "masagrator/FPSLocker", "fichier": "^FPSLocker\\.ovl$", "type": "ovl", "dossier": "FPSLocker", "licence": "GPL-2.0"}, {"id": "reversenx", "nom": "ReverseNX-RT", "cat": "enjeu", "texte": "Forcer un jeu en mode TV ou portable (plus beau ou plus d'autonomie).", "depot": "masagrator/ReverseNX-RT", "fichier": "^ReverseNX-RT-ovl\\.ovl$", "type": "ovl", "dossier": "ReverseNX-RT", "licence": "MIT"}, {"id": "edizon", "nom": "EdiZon Overlay", "cat": "enjeu", "texte": "Codes de triche en jeu (à utiliser hors ligne).", "depot": "proferabg/EdiZon-Overlay", "fichier": "^ovlEdiZon\\.ovl$", "type": "ovl", "dossier": "EdiZon", "licence": "voir le dépôt"}, {"id": "quickntp", "nom": "QuickNTP", "cat": "enjeu", "texte": "Remettre l'heure à jour en un appui.", "depot": "nedex/QuickNTP", "fichier": "^quickntp-.*\\.zip$", "type": "zip", "dossier": "QuickNTP", "licence": "GPL-2.0"}, {"id": "ovlsysmodules", "nom": "Sysmodules (overlay)", "cat": "enjeu", "texte": "Allumer ou éteindre les modules en arrière-plan.", "depot": "WerWolv/ovl-sysmodules", "fichier": "^ovlSysmodules\\.ovl$", "type": "ovl", "dossier": "ovlSysmodules", "licence": "GPL-2.0", "recommande": true}, {"id": "jksv", "nom": "JKSV", "cat": "outils", "texte": "Sauvegarder et restaurer les parties de tes jeux.", "depot": "J-D-K/JKSV", "fichier": "^JKSV\\.nro$", "type": "nro", "dossier": "JKSV", "licence": "GPL-3.0", "recommande": true}, {"id": "nxshell", "nom": "NX-Shell", "cat": "outils", "texte": "Explorateur de fichiers de la carte SD.", "depot": "joel16/NX-Shell", "fichier": "^NX-Shell\\.nro$", "type": "nro", "dossier": "NX-Shell", "licence": "GPL-2.0"}, {"id": "activitylog", "nom": "NX Activity Log", "cat": "outils", "texte": "Ton temps de jeu détaillé, jeu par jeu.", "depot": "zdm65477730/NX-Activity-Log", "fichier": "^NX-Activity-Log\\.nro$", "type": "nro", "dossier": "NX-Activity-Log", "licence": "MIT", "recommande": true}, {"id": "ftpd", "nom": "ftpd", "cat": "outils", "texte": "Copier des fichiers entre le PC et la Switch par le Wi-Fi.", "depot": "mtheall/ftpd", "fichier": "^ftpd\\.nro$", "type": "nro", "dossier": "ftpd", "licence": "GPL-3.0"}, {"id": "sphaira", "nom": "sphaira", "cat": "outils", "texte": "Menu homebrew moderne avec gestionnaire de fichiers.", "depot": "ITotalJustice/sphaira", "fichier": "^sphaira\\.zip$", "type": "zip", "dossier": "sphaira", "licence": "GPL-3.0"}, {"id": "aio", "nom": "AIO Switch Updater", "cat": "outils", "texte": "Mettre à jour Atmosphère et Hekate (pour qui sait ce qu'il fait).", "depot": "HamletDuFromage/aio-switch-updater", "fichier": "^aio-switch-updater\\.zip$", "type": "zip", "dossier": "aio-switch-updater", "licence": "GPL-3.0"}, {"id": "appstore", "nom": "Homebrew App Store", "cat": "outils", "texte": "Un magasin d'applis homebrew directement sur la Switch.", "depot": "fortheusers/hb-appstore", "fichier": "^appstore\\.nro$", "type": "nro", "dossier": "appstore", "licence": "GPL-3.0"}, {"id": "smm", "nom": "SimpleModManager", "cat": "outils", "texte": "Activer ou désactiver des mods de jeux.", "depot": "nadrino/SimpleModManager", "fichier": "^SimpleModManager\\.nro$", "type": "nro", "dossier": "SimpleModManager", "licence": "GPL-3.0"}, {"id": "frametap", "nom": "Switch Frame Tap", "cat": "outils", "texte": "Voir et filmer l'écran de la Switch sur le PC (menu HOME compris).", "depot": "TomasUribe/switch-frame-tap", "fichier": "^switch-frame-tap-.*-switch\\.zip$", "type": "zip", "dossier": "switch-frame-tap", "licence": "GPL-2.0", "module": true}, {"id": "missioncontrol", "nom": "MissionControl", "cat": "manettes", "texte": "Manettes PS4, PS5, Xbox en Bluetooth.", "depot": "ndeadly/MissionControl", "fichier": "^MissionControl-.*\\.zip$", "type": "zip", "dossier": "MissionControl", "licence": "GPL-2.0", "module": true}, {"id": "syscon", "nom": "sys-con", "cat": "manettes", "texte": "Manettes branchées en USB (PS, Xbox).", "depot": "cathery/sys-con", "fichier": "^sys-con-.*\\.zip$", "type": "zip", "dossier": "sys-con", "licence": "GPL-3.0", "module": true}, {"id": "ldnmitm", "nom": "ldn_mitm", "cat": "manettes", "texte": "Jouer en « local sans fil » par Internet avec des amis.", "depot": "spacemeowx2/ldn_mitm", "fichier": "^ldn_mitm_.*\\.zip$", "type": "zip", "dossier": "ldn_mitm", "licence": "GPL-2.0", "module": true}, {"id": "presence", "nom": "SwitchPresence", "cat": "manettes", "texte": "Montre sur Discord à quoi tu joues (avec un petit programme sur le PC). Ancien : peut ne pas marcher sur les derniers firmwares.", "depot": "SunResearchInstitute/SwitchPresence-Rewritten", "fichier": "^Sysmodule\\.zip$", "type": "zip", "dossier": "SwitchPresence", "licence": "GPL-2.0", "module": true}, {"id": "homenxplus", "nom": "HomeNX+", "cat": "homenx", "texte": "Le menu HOME amélioré : apparences, recherche, Médias, Claude, scènes. En appli de test.", "depot": "local", "fichier": "HomeNX+.nro", "type": "local", "dossier": "HomeNXPlus", "licence": "GPL-3.0", "recommande": true}, {"id": "claudenx", "nom": "ClaudeNX", "cat": "homenx", "texte": "Claude sur la Switch (ta propre clé API).", "depot": "local", "fichier": "ClaudeNX.nro", "type": "local", "dossier": "ClaudeNX", "licence": "GPL-3.0"}]};
+const byId = Object.fromEntries(CAT.applis.map(a => [a.id, a]));
+let pick = new Set(), rayon = 'tout', q = '', db = null, docRef = null, writing = false, pending = false, timer = 0, dl = null;
+try { const s = JSON.parse(localStorage.getItem('hnp-boutique') || '[]'); if (Array.isArray(s)) s.forEach(id => byId[id] && pick.add(id)); } catch (e) {}
+
+const norm = s => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const rayonsEl = document.getElementById('rayons');
+for (const [id, nom] of [['tout', 'Tout'], ...CAT.categories.map(c => [c.id, c.nom])]) {
+  const b = document.createElement('button'); b.type = 'button'; b.textContent = nom; b.dataset.r = id;
+  b.onclick = () => { rayon = id; render(); }; rayonsEl.append(b);
+}
+document.getElementById('q').addEventListener('input', e => { q = norm(e.target.value.trim()); render(); });
+
+function render() {
+  for (const b of rayonsEl.children) b.setAttribute('aria-pressed', String(b.dataset.r === rayon));
+  const root = document.getElementById('rayonsListe'); root.textContent = '';
+  for (const c of CAT.categories) {
+    if (rayon !== 'tout' && rayon !== c.id) continue;
+    const apps = CAT.applis.filter(a => a.cat === c.id && (!q || norm(a.nom + ' ' + a.texte).includes(q)));
+    if (!apps.length) continue;
+    const sec = document.createElement('section'); sec.className = 'rayon';
+    const h = document.createElement('h2'); h.textContent = c.nom;
+    const p = document.createElement('p'); p.className = 'rtext'; p.textContent = c.texte;
+    const grid = document.createElement('div'); grid.className = 'grid';
+    for (const a of apps) {
+      const lab = document.createElement('label'); lab.className = 'card' + (pick.has(a.id) ? ' on' : '');
+      const cb = document.createElement('input'); cb.type = 'checkbox'; cb.id = 'app-' + a.id; cb.checked = pick.has(a.id);
+      cb.onchange = () => { cb.checked ? pick.add(a.id) : pick.delete(a.id); lab.classList.toggle('on', cb.checked); summary(); queueSave(); };
+      const n = document.createElement('div'); n.className = 'cname'; n.textContent = a.nom;
+      const t = document.createElement('div'); t.className = 'ctext'; t.textContent = a.texte;
+      const bd = document.createElement('div'); bd.className = 'badges';
+      const add = (txt, cl) => { const s = document.createElement('span'); s.className = 'badge' + (cl ? ' ' + cl : ''); s.textContent = txt; bd.append(s); };
+      if (a.recommande) add('Recommandé', 'reco');
+      if (a.module) add('En arrière-plan', 'mod');
+      add(a.depot === 'local' ? 'HomeNX+' : a.licence);
+      lab.append(cb, n, t, bd); grid.append(lab);
+    }
+    sec.append(h, p, grid); root.append(sec);
+  }
+  if (!root.children.length) { const p = document.createElement('p'); p.className = 'rtext'; p.textContent = 'Aucune appli ne correspond.'; root.append(p); }
+  summary();
+}
+function summary() {
+  const n = pick.size;
+  document.getElementById('nb').textContent = n ? n + (n > 1 ? ' applis' : ' appli') + ' dans ton panier' : 'Panier vide';
+  const mods = [...pick].filter(id => byId[id].module).length;
+  document.getElementById('sum').textContent = n ? (mods ? mods + ' en arrière-plan' : '') : '';
+  document.getElementById('export').disabled = !n;
+  document.getElementById('vider').disabled = !n;
+}
+function status(t, err) { const s = document.getElementById('save'); s.textContent = t; s.className = 'save' + (err ? ' err' : ''); }
+function liste() { return { boutique: 'HomeNX+', catalogue: CAT.version, date: new Date().toISOString(), applis: [...pick] }; }
+function queueSave() {
+  try { localStorage.setItem('hnp-boutique', JSON.stringify([...pick])); } catch (e) {}
+  clearTimeout(timer); timer = setTimeout(flush, 600);
+  status(docRef ? 'Enregistrement…' : 'Panier gardé dans ce navigateur');
+}
+async function flush() {
+  if (!docRef) return;
+  if (writing) { pending = true; return; }
+  writing = true;
+  try { do { pending = false; await docRef.set(liste()); } while (pending); status('Panier enregistré : Claude peut le lire.'); }
+  catch (e) { status(e && e.code === 'invalid_argument' ? 'Tu peux voir la boutique mais pas enregistrer de panier : télécharge ta liste.' : 'Panier pas enregistré pour l\'instant.', true); }
+  finally { writing = false; }
+}
+document.getElementById('pack').onclick = () => { CAT.applis.filter(a => a.recommande).forEach(a => pick.add(a.id)); render(); queueSave(); };
+document.getElementById('vider').onclick = () => { pick.clear(); render(); queueSave(); };
+document.getElementById('export').onclick = async () => {
+  const text = JSON.stringify(liste(), null, 1);
+  if (dl) { try { await dl.save({ filename: 'ma_liste_switch.json', data: text }); status('Liste téléchargée.'); } catch (e) { status('Téléchargement refusé ou annulé.', true); } return; }
+  try {
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+    a.download = 'ma_liste_switch.json'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); status('Liste téléchargée.');
+  } catch (e) { status('Téléchargement impossible ici.', true); }
+};
+render();
+status(pick.size ? 'Panier gardé dans ce navigateur' : '');
+
+(async () => {
+  if (!window.claude) return;
+  dl = await window.claude.use('downloads');
+  db = await window.claude.use('db');
+  const user = await window.claude.use('user');
+  const id = user ? await user.id() : null;
+  if (!db || !id) return;
+  docRef = db.doc('paniers/' + id);
+  const t = setTimeout(() => status('Ton panier enregistré met du temps à arriver.', true), 10000);
+  try {
+    const snap = await docRef.get(); clearTimeout(t);
+    const v = snap && snap.exists ? snap.data() : null;
+    if (v && Array.isArray(v.applis)) { v.applis.forEach(x => byId[x] && pick.add(x)); render(); }
+    status(pick.size ? 'Panier enregistré : Claude peut le lire.' : 'Coche tes applis : ton panier s\'enregistre tout seul.');
+    if (pick.size && !(v && Array.isArray(v.applis) && v.applis.length === pick.size)) flush();
+  } catch (e) { clearTimeout(t); status('Impossible de lire ton panier enregistré.', true); }
+})();
+</script>
+</html>

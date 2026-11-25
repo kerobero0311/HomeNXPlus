@@ -3,7 +3,7 @@
 ## 0.1.0 (en cours, 24/11/2026)
 - Fork de HomeNX (ad3333m/homenx, build 213) sous GPL-3.0, avec crédits.
 - Compilation sous Windows natif : libnx 4.12, bibliothèques debug ignorées, ordre de liaison webp, Atmosphere-libs à jour.
-- Scripts : `outils/env.ps1`, `test.ps1`, `deploy.ps1` (FTP sécurisé), `logs.ps1`.
+- Scripts : `outils/env.ps1`, `test.ps1`, `deploy.ps1` (FTP sécurisé), `logs.ps1`, `nuit.ps1`.
 - Secours : `secours_menu_home.ps1` (Windows) et `linux/secours_menu_home.sh` (Kubuntu).
 - Le `.nro` de test range ses données à part (`config/homenxplus/`, `switch/HomeNXPlus/`) et ne touche pas au HomeNX installé.
 
@@ -85,3 +85,4 @@
 - Tournage : Switch Frame Tap (menu HOME filmé en MP4 sur le PC, par câble USB avec le pilote WinUSB de Zadig), filmer_ecran.sh sous Linux, recuperer_tournage.ps1.
 - Paquet de diffusion : outils\creer_release.ps1 (zip SD + PC + guide, SHA-256, garde-fou contre les données personnelles).
 - Tests et documents : adresse IP locale remplacée par une adresse d'exemple.
+- Tout en une passe : outils\tout_en_une_passe.ps1 (+ raccourci « Switch - Tout mettre a jour » sur le Bureau) : santé de la console, compilation si besoin, installation, documents, journaux, captures et rushes, bilan.

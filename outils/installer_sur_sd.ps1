@@ -1,5 +1,5 @@
 ﻿# outils/installer_sur_sd.ps1 : copie les livrables HomeNX+ sur la carte SD (lecteur du PC ou mode UMS).
-# Ecrit UNIQUEMENT dans les dossiers autorises (regle 4 du cahier des charges), fichier .tmp puis renommage,
+# Ecrit UNIQUEMENT dans les dossiers autorises par CLAUDE.md (regle 4), fichier .tmp puis renommage,
 # verification SHA-256, une ligne dans VERSIONS.txt. Ne touche jamais au menu HOME reel.
 [CmdletBinding()]
 param([string]$Lecteur = '', [switch]$Simulation)

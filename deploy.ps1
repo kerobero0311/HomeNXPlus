@@ -2,7 +2,7 @@
 # Avant : activer sys-ftpd (Ultrahand > Sysmodules) ; apres : le desactiver.
 # Usage :  .\deploy.ps1 -Ip 192.168.1.42            (port 5000 par defaut)
 #          .\deploy.ps1 -Ip 192.168.1.42 -Simulation (affiche ce qui serait envoye)
-# Regles : n'ecrit QUE dans switch/HomeNXPlus/ et switch/.overlays/HomeNXPlus.ovl,
+# Regles (CLAUDE.md) : n'ecrit QUE dans switch/HomeNXPlus/ et switch/.overlays/HomeNXPlus.ovl,
 # envoi dans un fichier .tmp puis renommage, une ligne ajoutee a VERSIONS.txt.
 [CmdletBinding()]
 param(

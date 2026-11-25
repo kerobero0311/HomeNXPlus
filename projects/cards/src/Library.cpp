@@ -1,3 +1,6 @@
+#ifdef HNP_PLUS
+#include "hnp/services.hpp"
+#endif
 #include "Library.hpp"
 #include "Settings.hpp"
 
@@ -853,7 +856,10 @@ std::string systemIconPath(const std::string& action) {
 #endif
     if (action == "get") return std::string(kAssets) + "icons/download.png"; // a Media app to download
     // HomeNX+ : cartes de la page Medias, avec les icones de CardsNX (aucun logo de marque)
-    if (action == "hnp_spotify") return std::string(kAssets) + "icons/music.png";
+#ifdef HNP_PLUS
+    for (const hnp::StreamingService& s : hnp::kStreamingServices)
+        if (s.music && action == std::string("hnp_") + s.id) return std::string(kAssets) + "icons/music.png";
+#endif
     if (action == "hnp_discord") return std::string(kAssets) + "icons/discord.png";
     if (action.rfind("hnp_", 0) == 0) return std::string(kAssets) + "icons/play.png";
     return std::string(kAssets) + "icons/sys_" + action + ".png"; // tools/make_cards_icons.py

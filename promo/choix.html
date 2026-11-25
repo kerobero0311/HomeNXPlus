@@ -1,0 +1,239 @@
+<title>Mes choix HomeNX+</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700&family=Manrope:wght@400;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+/* Mise en page : une colonne ; barre de progression collante en haut, puis 5 groupes de propositions avec trois choix chacune, puis une note libre. */
+:root {
+  --bg: #f5f6f9; --panel: #ffffff; --ink: #161922; --muted: #5d6475; --line: #dfe2ea; --chip: #eef0f5;
+  --yes: #13895f; --yes-soft: #e2f4ec; --maybe: #b26a00; --maybe-soft: #fdf0dc; --no: #b4382c; --no-soft: #fbe6e3; --accent: #d93a2e;
+  --display: "Unbounded", "Arial Black", system-ui, sans-serif; --body: "Manrope", "Segoe UI", system-ui, sans-serif; --mono: "JetBrains Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0d0f15; --panel: #161a24; --ink: #edf0f6; --muted: #9aa2b4; --line: #282d3a; --chip: #20242f;
+  --yes: #3fd39a; --yes-soft: #12301f; --maybe: #ffb64a; --maybe-soft: #33250f; --no: #ff7a6b; --no-soft: #36191a; --accent: #ff5c4f; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0d0f15; --panel: #161a24; --ink: #edf0f6; --muted: #9aa2b4; --line: #282d3a; --chip: #20242f;
+  --yes: #3fd39a; --yes-soft: #12301f; --maybe: #ffb64a; --maybe-soft: #33250f; --no: #ff7a6b; --no-soft: #36191a; --accent: #ff5c4f; color-scheme: dark }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 64px; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 820px; margin: 0 auto; display: grid; gap: 22px; padding-top: 26px; }
+header { display: grid; gap: 8px; }
+.eyebrow { font: 600 12px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+h1 { font: 700 clamp(26px, 5vw, 38px)/1.08 var(--display); margin: 0; text-wrap: balance; }
+.lead { color: var(--muted); margin: 0; max-width: 62ch; }
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding: 10px 0; display: grid; gap: 6px; border-bottom: 1px solid var(--line); }
+.bar .row1 { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: baseline; justify-content: space-between; }
+.counts { display: flex; flex-wrap: wrap; gap: 6px 14px; font: 600 13px var(--mono); font-variant-numeric: tabular-nums; }
+.counts .y { color: var(--yes); } .counts .m { color: var(--maybe); } .counts .n { color: var(--no); }
+.save { font-size: 13px; color: var(--muted); }
+.save.err { color: var(--no); }
+.track { height: 6px; border-radius: 3px; background: var(--chip); overflow: hidden; display: flex; }
+.track i { display: block; height: 100%; transition: width .25s; }
+.track .ty { background: var(--yes); } .track .tm { background: var(--maybe); } .track .tn { background: var(--no); }
+section.group { display: grid; gap: 8px; }
+h2 { font: 600 18px var(--display); margin: 8px 0 0; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+h2 small { font: 600 12px var(--mono); color: var(--muted); }
+.gnote { color: var(--muted); font-size: 14px; margin: 0; max-width: 66ch; }
+ol.items { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+li.item { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; grid-template-columns: 2.2em minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; }
+li.item.s-oui { border-color: var(--yes); } li.item.s-peut { border-color: var(--maybe); } li.item.s-non { opacity: .72; }
+.num { font: 600 12px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.txt { min-width: 0; display: grid; gap: 2px; }
+.txt b { font-weight: 700; }
+.txt span { color: var(--muted); font-size: 13.5px; }
+.tag { display: inline-block; font: 600 10.5px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); background: var(--chip); border-radius: 99px; padding: 1px 7px; margin-left: 6px; vertical-align: 1px; }
+.seg { display: inline-flex; gap: 4px; }
+.seg button { font: 600 13px var(--body); border: 1px solid var(--line); background: transparent; color: var(--muted); border-radius: 99px; padding: 6px 11px; cursor: pointer; min-width: 44px; }
+.seg button:hover { color: var(--ink); border-color: var(--muted); }
+.seg button[aria-pressed="true"].oui { background: var(--yes-soft); color: var(--yes); border-color: var(--yes); }
+.seg button[aria-pressed="true"].peut { background: var(--maybe-soft); color: var(--maybe); border-color: var(--maybe); }
+.seg button[aria-pressed="true"].non { background: var(--no-soft); color: var(--no); border-color: var(--no); }
+button:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+textarea { width: 100%; min-height: 110px; font: 15px/1.5 var(--body); color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; resize: vertical; }
+.foot { color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); padding-top: 12px; }
+@media (max-width: 600px) {
+  li.item { grid-template-columns: 2em minmax(0, 1fr); }
+  .seg { grid-column: 1 / -1; justify-self: start; }
+}
+@media (prefers-reduced-motion: reduce) { .track i { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">50 propositions · 3 choix chacune</div>
+    <h1>Qu'est-ce qu'on ajoute à ta Switch ?</h1>
+    <p class="lead">Pour chaque idée : <b>Oui</b>, <b>Peut-être</b> ou <b>Non</b>. Tes réponses s'enregistrent toutes seules, et je les lis directement ensuite pour faire ce que tu as choisi.</p>
+  </header>
+
+  <div class="bar" aria-live="polite">
+    <div class="row1">
+      <div class="counts" id="counts">0 / 50 répondues</div>
+      <div class="save" id="save">Chargement de tes réponses…</div>
+    </div>
+    <div class="track" aria-hidden="true"><i class="ty" id="ty"></i><i class="tm" id="tm"></i><i class="tn" id="tn"></i></div>
+  </div>
+
+  <div id="groups"></div>
+
+  <section class="group">
+    <h2>Une autre idée ?</h2>
+    <label class="gnote" for="note">Ce qui manque, ce que tu veux changer, n'importe quoi :</label>
+    <textarea id="note" placeholder="Par exemple : je voudrais un raccourci pour..."></textarea>
+  </section>
+
+  <p class="foot">Les services comme Netflix n'ont pas d'appli Switch : ils s'ouvrent sur le PC et s'affichent par Moonlight, en un appui depuis la page Médias. Rien n'est installé sans ton choix.</p>
+</div>
+
+<script>
+const GROUPS = [
+  { t: 'Films, séries et musique', n: 'Comme Netflix : un appui sur la carte réveille le PC, ouvre le service, puis Moonlight l\'affiche sur la Switch.', items: [
+    ['yt', 'YouTube sur le PC', 'En plus de NewPipe sur la Switch : ton compte, tes abonnements', 'Par le PC'],
+    ['twitch', 'Twitch', 'Les directs de jeux', 'Par le PC'],
+    ['crunchy', 'Crunchyroll', 'Animés en version originale sous-titrée', 'Par le PC'],
+    ['adn', 'ADN (Animation Digital Network)', 'Animés en français', 'Par le PC'],
+    ['canal', 'myCanal', 'Chaînes et séries Canal+', 'Par le PC'],
+    ['francetv', 'france.tv', 'France Télévisions en direct et en replay, gratuit', 'Par le PC'],
+    ['arte', 'Arte.tv', 'Films, documentaires, gratuit', 'Par le PC'],
+    ['max', 'Max', 'Séries HBO', 'Par le PC'],
+    ['appletv', 'Apple TV+', 'Séries Apple', 'Par le PC'],
+    ['paramount', 'Paramount+', 'Films et séries Paramount', 'Par le PC'],
+    ['deezer', 'Deezer', 'Musique', 'Par le PC'],
+    ['applemusic', 'Apple Music', 'Musique', 'Par le PC'],
+  ]},
+  { t: 'Applis à installer', n: 'Des applis libres de la Switch ou du PC.', items: [
+    ['chiaki', 'PlayStation à distance (chiaki-ng / Akira)', 'Jouer à ta PS4 ou PS5 sur la Switch (seulement si tu en as une)', 'Switch'],
+    ['reader', 'Lecteur de BD, mangas et PDF', 'Dès qu\'une version stable sort (BookReader-NX)', 'Switch'],
+    ['jellyfin', 'Serveur Jellyfin sur le PC', 'Tes films du PC dans GMCA ou Switchfin, avec jaquettes et reprise', 'PC'],
+    ['plex', 'Plex Media Server sur le PC', 'Même idée, avec Plex', 'PC'],
+    ['radio', 'Radio et podcasts dans HomeNX+', 'Une nouvelle page pour écouter la radio et des podcasts', 'À créer'],
+    ['presence', 'Statut Discord du jeu en cours', 'SwitchPresence : tes amis voient à quoi tu joues', 'Switch + PC'],
+    ['systune', 'Musique en fond pendant les jeux', 'sys-tune : ta musique par-dessus n\'importe quel jeu', 'Switch'],
+    ['retroarch', 'RetroArch', 'Encore plus de consoles rétro', 'Switch'],
+  ]},
+  { t: 'Nouvelles fonctions de HomeNX+', n: 'Ce que le menu pourrait faire en plus.', items: [
+    ['widgets', 'Widgets dans le panneau du bas', 'Dernier jeu, temps de jeu du jour, scène active', 'Menu'],
+    ['stats', 'Statistiques de jeu', 'Temps par jour et par semaine, jeux les plus joués, en graphiques', 'Menu'],
+    ['limite', 'Rappel de temps de jeu', 'Un message après le temps que tu choisis', 'Menu'],
+    ['dossiers', 'Dossiers dans l\'apparence Cartes', 'Ranger plusieurs jeux sous une seule carte', 'Menu'],
+    ['galerie', 'Captures dans la fiche de jeu', 'Les photos et vidéos de ce jeu, en galerie', 'Menu'],
+    ['contexte', 'Claude : choisir ce qu\'on lui envoie', 'Cases à cocher : jeu en cours, notes, capture', 'Claude'],
+    ['agent', 'Claude peut agir (avec ta confirmation)', 'Ex. « mets la scène Nuit », « range mes jeux de course »', 'Claude'],
+    ['resume', 'Résumé de la semaine', 'Temps de jeu et santé de la console, envoyé au PC', 'PC'],
+    ['autosave', 'Sauvegarde automatique des saves', 'Chaque semaine vers le PC, sans y penser', 'PC'],
+    ['journuit', 'Thème jour / nuit automatique', 'Clair le jour, sombre le soir', 'Menu'],
+    ['combos', 'Combinaisons de touches', 'Ex. L + B ouvre ClaudeNX, L + Y la recherche', 'Menu'],
+    ['rappels', 'Rappels', 'Ex. « recharge sous 20 % », « reprends ta partie de Zelda »', 'Menu'],
+  ]},
+  { t: 'Interface', n: 'L\'allure du menu.', items: [
+    ['liste', 'Mode liste compacte', 'Beaucoup de jeux à l\'écran, en liste', 'Look'],
+    ['taille', 'Taille des cartes réglable', 'Petites, moyennes ou grandes', 'Look'],
+    ['dock', 'Barre de raccourcis en bas', 'Tes applis favorites toujours à portée', 'Look'],
+    ['fonds', 'Fonds par page', 'Un fond différent pour Jeux, Médias, Homebrew', 'Look'],
+    ['sons', 'Sons d\'interface HomeNX+', 'Un petit son quand on navigue et ouvre', 'Look'],
+    ['icones', 'Icônes uniformes', 'Un même style d\'icône pour toutes les applis', 'Look'],
+    ['intro', 'Animation de démarrage HomeNX+', 'Un logo animé de 1 seconde au lancement', 'Look'],
+    ['couleur', 'Couleur selon le jeu choisi', 'L\'accent prend la couleur de la jaquette', 'Look'],
+    ['reprendre', 'Écran « Reprendre »', 'Ton dernier jeu en grand à l\'ouverture', 'Look'],
+    ['anglais', 'HomeNX+ en anglais aussi', 'Pour les gens qui le téléchargeront', 'Langue'],
+  ]},
+  { t: 'Diffusion', n: 'Partager ton travail.', items: [
+    ['github', 'Publier HomeNX+ sur GitHub', 'La version publique, sans tes fichiers personnels', 'Diffusion'],
+    ['traduction', 'Proposer ta traduction française à HomeNX', 'Une contribution au projet d\'origine', 'Diffusion'],
+    ['site', 'Petit site web', 'Page GitHub avec le trailer, le guide et le téléchargement', 'Diffusion'],
+    ['trailer', 'Vrai trailer de 2 minutes', 'Monté dans Clipchamp avec tes vidéos', 'Diffusion'],
+    ['forum', 'Présenter le projet sur un forum', 'GBAtemp ou Reddit', 'Diffusion'],
+    ['discord', 'Serveur Discord HomeNX+', 'Pour aider les gens qui l\'installent', 'Diffusion'],
+    ['assistant', 'Assistant de première installation', '3 écrans au premier lancement : style, Claude, PC', 'Menu'],
+    ['maj', 'Mises à jour de HomeNX+ depuis l\'appli', 'Un bouton « Mettre à jour » qui télécharge la nouvelle version', 'Menu'],
+  ]},
+];
+const ALL = GROUPS.flatMap(g => g.items);
+const LABEL = { oui: 'Oui', peut: 'Peut-être', non: 'Non' };
+let answers = {}, note = '', db = null, docRef = null, writing = false, pending = false, timer = 0;
+try { const s = JSON.parse(localStorage.getItem('hnp-choix') || 'null'); if (s && s.answers) { answers = s.answers; note = s.note || ''; } } catch (e) {}
+
+const groupsEl = document.getElementById('groups');
+let n = 0;
+for (const g of GROUPS) {
+  const sec = document.createElement('section'); sec.className = 'group';
+  const h = document.createElement('h2'); h.textContent = g.t; const sm = document.createElement('small'); sm.textContent = g.items.length + ' idées'; h.append(sm);
+  const p = document.createElement('p'); p.className = 'gnote'; p.textContent = g.n;
+  const ol = document.createElement('ol'); ol.className = 'items';
+  for (const [id, title, desc, tag] of g.items) {
+    n++;
+    const li = document.createElement('li'); li.className = 'item'; li.id = 'it-' + id;
+    const num = document.createElement('span'); num.className = 'num'; num.textContent = String(n).padStart(2, '0');
+    const txt = document.createElement('div'); txt.className = 'txt';
+    const b = document.createElement('b'); b.textContent = title; const t = document.createElement('span'); t.className = 'tag'; t.textContent = tag; b.append(t);
+    const d = document.createElement('span'); d.textContent = desc; txt.append(b, d);
+    const seg = document.createElement('div'); seg.className = 'seg'; seg.setAttribute('role', 'group'); seg.setAttribute('aria-label', title);
+    for (const k of ['oui', 'peut', 'non']) {
+      const btn = document.createElement('button'); btn.type = 'button'; btn.className = k; btn.textContent = LABEL[k]; btn.id = 'b-' + id + '-' + k;
+      btn.onclick = () => { answers[id] = answers[id] === k ? undefined : k; if (!answers[id]) delete answers[id]; paint(); queueSave(); };
+      seg.append(btn);
+    }
+    li.append(num, txt, seg); ol.append(li);
+  }
+  sec.append(h, p, ol); groupsEl.append(sec);
+}
+const noteEl = document.getElementById('note');
+noteEl.value = note;
+noteEl.addEventListener('input', () => { note = noteEl.value.slice(0, 4000); queueSave(); });
+
+function paint() {
+  let y = 0, m = 0, no = 0;
+  for (const [id] of ALL) {
+    const v = answers[id];
+    if (v === 'oui') y++; else if (v === 'peut') m++; else if (v === 'non') no++;
+    const li = document.getElementById('it-' + id); li.className = 'item' + (v ? ' s-' + v : '');
+    for (const k of ['oui', 'peut', 'non']) document.getElementById('b-' + id + '-' + k).setAttribute('aria-pressed', String(v === k));
+  }
+  const c = document.getElementById('counts'); c.textContent = '';
+  const parts = [[`${y + m + no} / ${ALL.length} répondues`, ''], [`${y} oui`, 'y'], [`${m} peut-être`, 'm'], [`${no} non`, 'n']];
+  for (const [t, cl] of parts) { const s = document.createElement('span'); s.textContent = t; if (cl) s.className = cl; c.append(s); }
+  const pct = v => (100 * v / ALL.length) + '%';
+  document.getElementById('ty').style.width = pct(y); document.getElementById('tm').style.width = pct(m); document.getElementById('tn').style.width = pct(no);
+}
+function status(t, err) { const s = document.getElementById('save'); s.textContent = t; s.className = 'save' + (err ? ' err' : ''); }
+function queueSave() {
+  try { localStorage.setItem('hnp-choix', JSON.stringify({ answers, note })); } catch (e) {}
+  clearTimeout(timer); timer = setTimeout(flush, 600);
+  status(docRef ? 'Enregistrement…' : 'Gardé dans ce navigateur');
+}
+async function flush() {
+  if (!docRef) return;
+  if (writing) { pending = true; return; }
+  writing = true;
+  try {
+    do { pending = false; await docRef.set({ answers, note, updated: new Date().toISOString() }); } while (pending);
+    status('Enregistré : Claude pourra lire tes réponses.');
+  } catch (e) {
+    status(e && e.code === 'invalid_argument' ? 'Tu peux voir cette page mais pas répondre.' : 'Pas enregistré pour l\'instant : réessaie dans un moment.', true);
+  } finally { writing = false; }
+}
+paint();
+status('Gardé dans ce navigateur');
+
+(async () => {
+  db = window.claude ? await window.claude.use('db') : null;
+  if (!db) { status('Hors de claude.ai : tes réponses restent dans ce navigateur.'); return; }
+  docRef = db.doc('choix/reponses');
+  const t = setTimeout(() => status('Tes réponses mettent du temps à arriver.', true), 10000);
+  try {
+    const snap = await docRef.get();
+    clearTimeout(t);
+    const v = snap && snap.exists ? snap.data() : null;
+    if (v && v.answers && typeof v.answers === 'object') {
+      answers = { ...v.answers, ...answers };  // ce navigateur complète ce qui est déjà enregistré
+      if (!note && typeof v.note === 'string') { note = v.note; noteEl.value = note; }
+      paint();
+    }
+    status(Object.keys(answers).length ? 'Enregistré : Claude pourra lire tes réponses.' : 'Prêt : clique sur tes choix.');
+    if (Object.keys(answers).length && !(v && v.answers)) flush();
+  } catch (e) { clearTimeout(t); status('Impossible de lire les réponses enregistrées pour l\'instant.', true); }
+})();
+</script>

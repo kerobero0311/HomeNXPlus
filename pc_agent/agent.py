@@ -31,7 +31,7 @@ import urllib.parse
 import uuid
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-VERSION = "0.2.0"
+VERSION = "0.3.0"
 TAILLE_MAX = 64 * 1024 * 1024          # 64 Mo par fichier depose
 CATEGORIES = {"saves", "captures", "notes", "divers"}
 # Streaming : la Switch n'a pas d'appli Netflix / Disney+ / Prime Video (et son navigateur n'a pas
@@ -42,6 +42,18 @@ SERVICES = {
     "disney": "https://www.disneyplus.com/",
     "prime": "https://www.primevideo.com/",
     "spotify": "https://open.spotify.com/",
+    "youtube": "https://www.youtube.com/",
+    "twitch": "https://www.twitch.tv/",
+    "crunchyroll": "https://www.crunchyroll.com/fr/",
+    "adn": "https://animationdigitalnetwork.com/",
+    "canal": "https://www.canalplus.com/",
+    "francetv": "https://www.france.tv/",
+    "arte": "https://www.arte.tv/fr/",
+    "max": "https://play.max.com/",
+    "appletv": "https://tv.apple.com/",
+    "paramount": "https://www.paramountplus.com/",
+    "deezer": "https://www.deezer.com/",
+    "applemusic": "https://music.apple.com/",
 }
 
 

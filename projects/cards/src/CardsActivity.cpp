@@ -23,6 +23,9 @@
 #include <switchu/ns_ext.hpp>
 #include <SDL2/SDL_mixer.h>
 
+#ifdef HNP_PLUS
+#include "hnp/services.hpp"
+#endif
 #ifdef SWITCHU_MENU
 #include "core/FontChoice.hpp"
 #include "news/NewsStore.hpp"
@@ -2126,15 +2129,12 @@ void CardsActivity::splitMedia() {
     }
 #ifdef HNP_PLUS
     { // HomeNX+ : services sans appli Switch (ouverts sur le PC, regardes par Moonlight) et Discord
-        struct Card { const char* action; const char* name; const char* about; };
-        static const Card kCards[] = {
-            {"hnp_netflix", "Netflix", "Sur le PC, avec Moonlight"},
-            {"hnp_disney", "Disney+", "Sur le PC, avec Moonlight"},
-            {"hnp_prime", "Prime Video", "Sur le PC, avec Moonlight"},
-            {"hnp_spotify", "Spotify", "Sur le PC, avec Moonlight"},
-            {"hnp_discord", "Discord", "Messages et serveurs"},
-            {"hnp_pcgames", "Jeux du PC", "Réveil du PC puis Moonlight"},
-        };
+        struct Card { std::string action; const char* name; std::string about; };
+        std::vector<Card> kCards;
+        for (const hnp::StreamingService& s : hnp::kStreamingServices)
+            kCards.push_back({std::string("hnp_") + s.id, s.name, std::string(s.about) + " · par le PC"});
+        kCards.push_back({"hnp_discord", "Discord", "Messages et serveurs"});
+        kCards.push_back({"hnp_pcgames", "Jeux du PC", "Réveil du PC puis Moonlight"});
         for (const Card& c : kCards) {
             Game g;
             g.action = c.action;

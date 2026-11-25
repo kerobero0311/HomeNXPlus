@@ -134,7 +134,12 @@ class Serveur(unittest.TestCase):
             self.assertEqual(self.req("POST", "/ouvrir", json.dumps(refuse).encode())[0], 400)
         self.assertEqual(self.req("POST", "/ouvrir", b"x", jeton=False)[0], 401)
         self.assertEqual(len(ouvertes), 1)
-        self.assertEqual(set(agent.SERVICES), {"netflix", "disney", "prime", "spotify"})
+        # la liste du PC et celle de la Switch (hnp/services.hpp) doivent être identiques
+        import re, pathlib
+        hpp = (pathlib.Path(__file__).resolve().parent.parent / "projects/homenxplus/include/hnp/services.hpp").read_text(encoding="utf-8")
+        switch_ids = set(re.findall(r'\{"([a-z0-9]+)", "', hpp))
+        self.assertEqual(set(agent.SERVICES), switch_ids)
+        self.assertTrue(all(u.startswith("https://") for u in agent.SERVICES.values()))
 
 
 if __name__ == "__main__":

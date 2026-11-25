@@ -15,6 +15,7 @@
 #include "hnp/pclink.hpp"
 #include "hnp/safemode.hpp"
 #include "hnp/scenes.hpp"
+#include "hnp/services.hpp"
 #include "hnp/switch_actions.hpp"
 #include "hnp/switch_games.hpp"
 #include "libclaude/claude.hpp"
@@ -757,14 +758,11 @@ void CardsActivity::hnpWatch(const std::string& service, const std::string& name
 
 void CardsActivity::openHnpStreaming() {
     std::vector<MenuItem> items;
-    const std::pair<const char*, const char*> kServices[] = {
-        {"netflix", "Netflix"}, {"disney", "Disney+"}, {"prime", "Prime Video"}, {"spotify", "Spotify"}};
-    for (const auto& [id, name] : kServices) {
-        const std::string sid = id, label = name;
+    for (const hnp::StreamingService& s : hnp::kStreamingServices) {
+        const std::string sid = s.id, label = s.name;
         MenuItem row = action(label, [this, sid, label]() { hnpWatch(sid, label); });
-        row.detail = sid == "spotify" ? "Ouvert sur le PC : le son et l'image arrivent par Moonlight"
-                                      : "Sur le PC, regarde sur la Switch avec Moonlight";
-        row.glyph = sid == "spotify" ? "music" : "play";
+        row.detail = std::string(s.about) + " · sur le PC, affiché par Moonlight";
+        row.glyph = s.music ? "music" : "play";
         items.push_back(std::move(row));
     }
 #ifdef SWITCHU_MENU
@@ -791,7 +789,7 @@ void CardsActivity::openHnpStreaming() {
     why.glyph = "news";
     items.push_back(std::move(why));
     items.push_back(action("Retour", [this]() { openHnp(); }));
-    openMenu("Netflix, Disney+, Prime Video, Spotify", std::move(items));
+    openMenu("Films, séries et musique par le PC", std::move(items));
 }
 
 // ---------------------------------------------------------------- le panneau

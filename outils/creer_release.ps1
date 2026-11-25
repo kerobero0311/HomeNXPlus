@@ -32,7 +32,9 @@ foreach ($f in 'agent.py', 'test_agent.py', 'lancer_pc_agent.ps1', 'config_switc
     if (Test-Path "$Racine\pc_agent\$f") { $plan += ,@("$Racine\pc_agent\$f", "PC\pc_agent\$f") }
 }
 $plan += ,@("$Racine\secours_menu_home.ps1", 'PC\secours_menu_home.ps1')
-foreach ($f in 'index.html', 'guide.html', 'Guide_Switch_HomeNXPlus.pdf', 'trailer.html', 'tournage.html') {
+$plan += ,@("$Racine\boutique\installer_boutique.ps1", 'PC\boutique\installer_boutique.ps1')
+$plan += ,@("$Racine\boutique\catalogue.json", 'PC\boutique\catalogue.json')
+foreach ($f in 'index.html', 'guide.html', 'Guide_Switch_HomeNXPlus.pdf', 'trailer.html', 'tournage.html', 'boutique.html') {
     $plan += ,@("$Racine\promo\$f", "Guide\$f")
 }
 
