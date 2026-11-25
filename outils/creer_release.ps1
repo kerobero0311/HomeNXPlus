@@ -49,7 +49,14 @@ foreach ($p in $plan) {
 $interdits = 'api_key', 'pc_agent.ini', 'agent.json', 'discord.json', 'prod.keys', 'title.keys'
 $trouves = Get-ChildItem $Dossier -Recurse -File | Where-Object { $n = $_.Name; $interdits | Where-Object { $n -like "*$_*" } }
 if ($trouves) { throw "Fichier interdit dans le paquet : $($trouves.Name -join ', ')" }
-$texte = Get-ChildItem $Dossier -Recurse -File -Include *.html, *.md, *.ini, *.py, *.ps1, *.sh | Select-String -Pattern 'sk-ant-api0[0-9]-[A-Za-z0-9_-]{20,}', '10\.204\.', '14:AC:60' -List
+# Motifs cherchés : une clé API, et les vraies valeurs de ce PC (adresse, MAC, jeton) lues dans sa config locale
+$motifs = @('sk-ant-api0[0-9]-[A-Za-z0-9_-]{20,}')
+foreach ($ini in 'Z:\config\homenxplus\pc_agent.ini') {
+    if (Test-Path $ini) { foreach ($l in Get-Content $ini) { if ($l -match '^\s*(ip|mac|jeton|token)\s*=\s*(\S{6,})') { $motifs += [regex]::Escape($Matches[2]) } } }
+}
+$agent = Join-Path $env:APPDATA 'HomeNXPlus\agent.json'
+if (Test-Path $agent) { $j = Get-Content $agent -Raw | ConvertFrom-Json; if ($j.jeton) { $motifs += [regex]::Escape($j.jeton) } }
+$texte = Get-ChildItem $Dossier -Recurse -File -Include *.html, *.md, *.ini, *.py, *.ps1, *.sh, *.txt | Select-String -Pattern $motifs -List
 if ($texte) { throw "Donnée personnelle trouvée : $($texte.Path -join ', ')" }
 
 $lisez = @"
