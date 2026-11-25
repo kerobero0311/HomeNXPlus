@@ -8,6 +8,7 @@
 #include <nxui/Application.hpp>
 #include <nxui/core/GpuDevice.hpp>
 #include <fmt/format.h>
+#include <exception>
 #include "CardsActivity.hpp"  // HomeNX+ : aussi dans le .nro de test (apparence Cartes)
 #include <fstream>
 #include <string>
@@ -294,6 +295,21 @@ int main(int argc, char* argv[]) {
     g_homenxStartTick = armGetSystemTick();
     DebugLog::openFileLog();
     DebugLog::log("[hb] main() entry");
+    // HomeNX+ : journal de demarrage sans perte (une ligne = un fichier ouvert puis ferme),
+    // dans config/homenxplus/cards/start.log, et la raison exacte si une exception arrete l'app.
+    cards::startLogBegin(true, "=== HomeNX+ .nro : demarrage ===");
+    std::set_terminate([] {
+        std::string why = "arret (std::terminate)";
+        if (std::exception_ptr e = std::current_exception()) {
+            try { std::rethrow_exception(e); }
+            catch (const std::exception& x) { why = std::string("EXCEPTION : ") + x.what(); }
+            catch (...) { why = "EXCEPTION inconnue"; }
+        }
+        cards::startStep(why);
+        fsdevCommitDevice("sdmc");
+        std::abort();
+    });
+    cards::startStep("main : entree");
     DebugLog::log("[main] applet config...");
 #else
     DebugLog::log("[menu] main() entry");
@@ -347,9 +363,13 @@ int main(int argc, char* argv[]) {
     // HomeNX+ : mode sans echec apres 3 demarrages rates de suite
     hnp::g_safeMode = hnp::isSafe(hnp::beginStart(HNP_CFG_SWITCHU "/hnp_starts"));
     if (hnp::g_safeMode) DebugLog::log("[hnp] MODE SANS ECHEC (%d demarrages rates)", hnp::g_failedStarts);
-    std::thread([] { svcSleepThread(30'000'000'000LL); hnp::markHealthy(HNP_CFG_SWITCHU "/hnp_starts"); }).detach();
+    // (Plus de fil de 30 s ici : sur la console, sa creation arretait l'app net, avant tout ecran.
+    //  Le demarrage est marque reussi des que l'ecran est pret, plus bas, et a la sortie propre.)
 
     DebugLog::log("[main] creating app...");
+#ifdef SWITCHU_HOMEBREW
+    cards::startStep("main : avant la creation de l'application");
+#endif
     {
         nxui::Application app;
 #ifdef SWITCHU_HOMEBREW
@@ -364,6 +384,7 @@ int main(int argc, char* argv[]) {
         // Cartes par defaut (comme le menu HOME de tous les jours). Bouton Style pour changer.
         std::string homeStyle;
         std::getline(std::ifstream(HNP_CFG_SWITCHU "/frontend.txt"), homeStyle);
+        cards::startStep("style : '" + homeStyle + "'");
         if (homeStyle.empty() || homeStyle.rfind("cards", 0) == 0)
             app.setActivity(std::make_unique<cards::CardsActivity>());
         else if (startupConfig.tutorialCompleted)
@@ -371,11 +392,16 @@ int main(int argc, char* argv[]) {
         else
             app.setActivity(std::make_unique<TutorialActivity>(makeMenuActivity));
         DebugLog::log("[hb] app.initialize...");
+        cards::startStep("app.initialize...");
         if (app.initialize()) {
             DebugLog::log("[hb] app.run...");
+            hnp::markHealthy(HNP_CFG_SWITCHU "/hnp_starts");  // ecran pret : demarrage reussi
+            cards::startStep("app.run (ecran affiche)");
             app.run();
+            cards::startStep("app.run termine (sortie normale)");
         } else {
             DebugLog::log("[hb] app.initialize FAILED");
+            cards::startStep("app.initialize a ECHOUE");
         }
         DebugLog::log("[hb] app.shutdown...");
         app.shutdown();
@@ -441,6 +467,7 @@ int main(int argc, char* argv[]) {
         try {
             if (app.initialize()) {
                 DebugLog::log("[menu] app.run...");
+                hnp::markHealthy(HNP_CFG_SWITCHU "/hnp_starts");  // HomeNX+ : ecran pret, demarrage reussi
                 app.run();
             } else {
                 DebugLog::log("[menu] app.initialize FAILED");

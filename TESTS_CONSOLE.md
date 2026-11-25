@@ -20,6 +20,24 @@ Le vrai menu HOME n'est pas modifié : rien ne peut casser le démarrage.
 - [ ] HomeNX+ > Scènes : « Batterie » puis « Aucune »
 - [ ] Films > Netflix (PC allumé, **pc_agent 0.2.0 lancé**) : Netflix s'ouvre sur le PC puis Moonlight démarre
 
+## 1 B. Nouveautés 0.9.1
+- [ ] Page **Médias** (ZL / ZR) : cartes Netflix, Disney+, Prime Video, Spotify, Discord, plus Moonlight, Switchfin, StremNX, TsVitch
+- [ ] Carte Discord : le Discord de HomeNX s'ouvre
+- [ ] + sur un jeu > Fiche HomeNX+ > Scène de ce jeu : « Batterie », lancer le jeu (fréquences basses), revenir au menu (retour à la normale)
+- [ ] Fiche HomeNX+ > Cocher la checklist : cocher 2 objectifs, refermer, rouvrir : ils restent cochés
+- [ ] Claude > Poser une question : le message « Claude réfléchit… » reste affiché jusqu'à la réponse
+
+## 1 C. Nouveautés 0.9.2
+- [ ] Sur l'accueil, **Y** : taper « zel » : les jeux dont le nom contient « zel » s'affichent ; A amène sur la carte
+- [ ] Clavier USB branché (dock) : taper une lettre ouvre la recherche
+- [ ] Clic du stick gauche : le panneau HomeNX+ s'ouvre
+- [ ] Page Médias : SwitchWave, GMCA, NXMilk et NewPipe y sont, et se lancent
+
+## 1 D. Nouveautés 0.9.3
+- [ ] Panneau HomeNX+ > Ranger mes jeux avec Claude : une proposition de pages s'affiche ; « Créer ces pages » : elles apparaissent (ZL / ZR)
+- [ ] Page Médias > Jeux du PC (PC en veille, Wake-on-LAN actif) : le PC se réveille, puis Moonlight démarre
+- [ ] Apparence Wii U > Réglages > HomeNX+ > Médias : Netflix ouvre le site sur le PC puis Moonlight
+
 ## 1 ter. Onglet « HomeNX+ » (dans HomeNX+ : Réglages, dernier onglet à droite)
 - [ ] L'onglet **HomeNX+** apparaît après « HomeNX »
 - [ ] Claude : « Clé API : Présente » une fois la clé mise ; « Ouvrir ClaudeNX » lance ClaudeNX
@@ -29,7 +47,7 @@ Le vrai menu HOME n'est pas modifié : rien ne peut casser le démarrage.
 
 ## 1 quater. Lien avec le PC (onglet HomeNX+ > PC)
 Sur le PC d'abord : `.\pc_agent\lancer_pc_agent.ps1` (accepter Python sur le réseau **privé** si Windows le demande), puis `.\outils\installer_sur_sd.ps1` avec la carte dans l'Ally.
-- [ ] « Lien avec le PC : Connecté (192.168.1.50) »
+- [ ] « Lien avec le PC : Connecté (adresse du PC) »
 - [ ] « Envoyer un message au PC » : le fichier arrive dans `Documents\Switch_Sauvegardes\boite\de_switch`
 - [ ] Déposer un fichier `.json` dans `Documents\Switch_Sauvegardes\boite\vers_switch`, puis « Messages du PC » > Lire
 - [ ] « Réveiller le PC », PC en veille : il ne se réveillera sans doute pas en Wi-Fi (le Wake-on-LAN marche surtout en câble Ethernet)

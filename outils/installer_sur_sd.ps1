@@ -1,4 +1,4 @@
-# outils/installer_sur_sd.ps1 : copie les livrables HomeNX+ sur la carte SD (lecteur du PC ou mode UMS).
+﻿# outils/installer_sur_sd.ps1 : copie les livrables HomeNX+ sur la carte SD (lecteur du PC ou mode UMS).
 # Ecrit UNIQUEMENT dans les dossiers autorises (regle 4 du cahier des charges), fichier .tmp puis renommage,
 # verification SHA-256, une ligne dans VERSIONS.txt. Ne touche jamais au menu HOME reel.
 [CmdletBinding()]
@@ -22,7 +22,8 @@ $plan = @(
     @{ src = "$Racine\linux\secours_menu_home.sh";       dst = 'switchroot\outils\homenxplus\secours_menu_home.sh'; lf = $true },
     @{ src = "$Racine\linux\rapport_sante.sh";           dst = 'switchroot\outils\homenxplus\rapport_sante.sh'; lf = $true },
     @{ src = "$Racine\linux\boite_aux_lettres.sh";       dst = 'switchroot\outils\homenxplus\boite_aux_lettres.sh'; lf = $true },
-    @{ src = "$Racine\linux\installer.sh";               dst = 'switchroot\outils\homenxplus\installer.sh'; lf = $true }
+    @{ src = "$Racine\linux\installer.sh";               dst = 'switchroot\outils\homenxplus\installer.sh'; lf = $true },
+    @{ src = "$Racine\linux\filmer_ecran.sh";           dst = 'switchroot\outils\homenxplus\filmer_ecran.sh'; lf = $true }
 )
 $autorise = '^(switch\\HomeNXPlus\\|switch\\ClaudeNX\\|switch\\\.overlays\\HomeNXPlus\.ovl$|homenxplus\\|config\\homenxplus\\|switchroot\\outils\\homenxplus\\)'
 foreach ($p in $plan) {

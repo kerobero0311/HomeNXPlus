@@ -5,7 +5,7 @@ Version modifiée de [HomeNX](https://github.com/ad3333m/homenx) (ad3333m), elle
 [SwitchU](https://github.com/PoloNX/SwitchU) (PoloNX). Licence **GPL-3.0**. Crédits : `CREDITS.md`.
 Le README d'origine est conservé dans `README_HomeNX.md`.
 
-> État : **en développement** (version 0.9). HomeNX+ se teste en **application** (`.nro`) ;
+> État : **en développement** (version 0.9.3). HomeNX+ se teste en **application** (`.nro`) ;
 > l'installation comme vrai menu HOME remplace HomeNX (sauvegarde et plan de secours d'abord).
 
 **In English (short):** HomeNX+ is a French fork of HomeNX for modded Switch consoles (Atmosphère).

@@ -852,6 +852,10 @@ std::string systemIconPath(const std::string& action) {
             return std::string("romfs:/icons/hx/") + file + ".png"; // copied from HomeNX's at build
 #endif
     if (action == "get") return std::string(kAssets) + "icons/download.png"; // a Media app to download
+    // HomeNX+ : cartes de la page Medias, avec les icones de CardsNX (aucun logo de marque)
+    if (action == "hnp_spotify") return std::string(kAssets) + "icons/music.png";
+    if (action == "hnp_discord") return std::string(kAssets) + "icons/discord.png";
+    if (action.rfind("hnp_", 0) == 0) return std::string(kAssets) + "icons/play.png";
     return std::string(kAssets) + "icons/sys_" + action + ".png"; // tools/make_cards_icons.py
 }
 

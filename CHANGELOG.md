@@ -59,3 +59,29 @@
 - `pc_agent` 0.2.0 : `POST /ouvrir` limité à 4 adresses, testé.
 - Mise à jour automatique de HomeNX désactivée dans HomeNX+ (elle remplacerait le fork).
 - Réglages CardsNX du `.nro` de test dans `config/homenxplus/cards` (macro `HNP_CFG_CARDS`).
+
+## 0.9.1 (25/11/2026)
+- Correction : le `.nro` s'arrêtait au démarrage (fil de 30 s impossible à créer sur la console) ; démarrage marqué réussi quand l'écran est prêt ; erreurs de démarrage notées dans `config/homenxplus/cards/start.log`.
+- Page Médias : cartes Netflix, Disney+, Prime Video, Spotify (par le PC) et Discord ; Moonlight, Switchfin, StremNX, TsVitch, NXMP, wiliwili rangées d'office. Tuile « Films » retirée.
+- La scène d'un jeu s'applique à son lancement et s'arrête au retour au menu.
+- Garde batterie 15 % / 8 % dans l'apparence Cartes.
+- Message « en cours » visible pendant tout le travail de Claude ou du PC.
+- Checklist cochable dans le menu ; accents rétablis dans les textes HomeNX+.
+- `ANALYSE.md` : analyse complète et liste priorisée avant diffusion.
+
+## 0.9.2 (25/11/2026)
+- Recherche par nom dans les Cartes : touche Y, tuile Rechercher, ou une lettre tapée au clavier USB (idée de tomvita/SwitchU). Résultats de toutes les pages, sans tenir compte des accents.
+- Clic du stick gauche : ouvre le panneau HomeNX+.
+- Page Médias : SwitchWave, GMCA, NXMilk, Switch-NewPipe reconnues.
+- ANALYSE.md : tableau du mix des projets (HomeNX, SwitchU, tomvita, uLaunch, sLaunch, CardsNX).
+
+## 0.9.3 (25/11/2026)
+- Rangement assisté par Claude : il propose des pages par genre (Aventure, Course...), tu acceptes ou non ; logique testée (`hnp/assist`, test `hnp_assist`).
+- « Jeux du PC » : réveille le PC si besoin puis lance Moonlight (panneau HomeNX+ et carte de la page Médias).
+- Apparence Wii U : section Médias (Netflix, Disney+, Prime Video, Spotify par le PC, puis Moonlight) dans l'onglet HomeNX+.
+
+## 0.9.3 (suite, 25/11/2026)
+- Dossier hors ligne (accueil, guide + PDF, trailer, Ludothèque sans compte, feuille de tournage) sur le Bureau, sur la carte (homenxplus/docs) et en un lien.
+- Tournage : Switch Frame Tap (menu HOME filmé en MP4 sur le PC, par câble USB avec le pilote WinUSB de Zadig), filmer_ecran.sh sous Linux, recuperer_tournage.ps1.
+- Paquet de diffusion : outils\creer_release.ps1 (zip SD + PC + guide, SHA-256, garde-fou contre les données personnelles).
+- Tests et documents : adresse IP locale remplacée par une adresse d'exemple.

@@ -99,6 +99,20 @@ const MediaApp kMediaApps[] = {
      "sdmc:/switch/TikTok/TikTok.nro"},
     {"AnikkuNX", {"anikku", nullptr}, nullptr, nullptr},
     {"Cinejoy", {"cinejoy", nullptr}, nullptr, nullptr},
+#ifdef HNP_PLUS
+    // HomeNX+ : les autres applis de films, series, TV et musique rangees d'office dans Medias
+    // (seulement si elles sont sur la carte : aucun telechargement).
+    {"Moonlight", {"moonlight", nullptr}, nullptr, nullptr},
+    {"Switchfin", {"switchfin", "jellyfin"}, nullptr, nullptr},
+    {"StremNX", {"stremnx", "stremio"}, nullptr, nullptr},
+    {"TsVitch", {"tsvitch", nullptr}, nullptr, nullptr},
+    {"NXMP", {"nxmp", nullptr}, nullptr, nullptr},
+    {"wiliwili", {"wiliwili", nullptr}, nullptr, nullptr},
+    {"SwitchWave", {"switchwave", nullptr}, nullptr, nullptr},
+    {"GMCA", {"gmca", "plenx"}, nullptr, nullptr},
+    {"NXMilk", {"nxmilk", nullptr}, nullptr, nullptr},
+    {"Switch-NewPipe", {"newpipe", nullptr}, nullptr, nullptr},
+#endif
 };
 const char* const kSortNames[] = {"Last Played", "Title", "Most Played", "My Order"};
 constexpr int kSortCycle[] = {1, 3, 0, 2}; // The sort button, Settings > Home > Sort games: Title, My Order, Last Played, Most Played
@@ -2110,6 +2124,28 @@ void CardsActivity::splitMedia() {
         g.id = 0xFD00000000000000ULL | (std::hash<std::string>{}(g.path) & 0x00FFFFFFFFFFFFFFULL);
         media.push_back(std::move(g));
     }
+#ifdef HNP_PLUS
+    { // HomeNX+ : services sans appli Switch (ouverts sur le PC, regardes par Moonlight) et Discord
+        struct Card { const char* action; const char* name; const char* about; };
+        static const Card kCards[] = {
+            {"hnp_netflix", "Netflix", "Sur le PC, avec Moonlight"},
+            {"hnp_disney", "Disney+", "Sur le PC, avec Moonlight"},
+            {"hnp_prime", "Prime Video", "Sur le PC, avec Moonlight"},
+            {"hnp_spotify", "Spotify", "Sur le PC, avec Moonlight"},
+            {"hnp_discord", "Discord", "Messages et serveurs"},
+            {"hnp_pcgames", "Jeux du PC", "Réveil du PC puis Moonlight"},
+        };
+        for (const Card& c : kCards) {
+            Game g;
+            g.action = c.action;
+            g.name = c.name;
+            g.author = c.about;
+            g.homebrew = true;
+            g.id = 0xFC00000000000000ULL | (std::hash<std::string>{}(g.action) & 0x00FFFFFFFFFFFFFFULL);
+            if (!listed(m_settings.mediaOut, g)) media.push_back(std::move(g));
+        }
+    }
+#endif
     for (size_t i = 0; i < media.size(); ++i) media[i].order = static_cast<int>(i);
     m_pages[kMedia] = std::move(media);
     applyOrder(kMedia);
@@ -2384,6 +2420,9 @@ void CardsActivity::launchGame(const Game& g) {
     m_settings.hbPath.clear(); // (a game, not homebrew, is what's open next)
     m_settings.hbHost.clear();
     welcomeBack(g);
+#ifdef HNP_PLUS
+    hnpSceneForLaunch(id); // HomeNX+ : la scene choisie pour ce jeu (frequences, luminosite)
+#endif
     leave(index, 1.3f, [this, id]() {
         m_discord.beginShutdown(); // its threads stop while the screen goes black
         if (!m_launcher.requestLaunch(id, launchUid())) {
@@ -2394,6 +2433,9 @@ void CardsActivity::launchGame(const Game& g) {
         m_launcher.closeForLaunch();
     });
 #else
+#ifdef HNP_PLUS
+    hnpSceneForLaunch(id);
+#endif
     leave(index, 1.3f, [this, id]() {
         if (launch(id, m_user)) {
             app().requestExit(); // the game starts once this has closed
@@ -2675,6 +2717,14 @@ void CardsActivity::openDiscord() {
 
 void CardsActivity::openNintendo(const Game& g) {
     const std::string& a = g.action;
+#ifdef HNP_PLUS
+    if (a.rfind("hnp_", 0) == 0) { // HomeNX+ : cartes de la page Medias
+        if (a == "hnp_discord") openDiscord();
+        else if (a == "hnp_pcgames") hnpPlayPc();
+        else hnpWatch(a.substr(4), g.name);
+        return;
+    }
+#endif
     if (a == "get") { // a Media app that isn't on the SD card yet
         getMedia(g);
         return;
@@ -4840,7 +4890,7 @@ void CardsActivity::openDots() {
 #ifdef HNP_PLUS
     m_dotsTiles.push_back({"HomeNX+", "trophy", nxui::Color(0.85f, 0.45f, 1.f, 1.f), [this]() { openHnp(); }});
     m_dotsTiles.push_back({"Style", "copy", nxui::Color(0.3f, 0.85f, 0.85f, 1.f), [this]() { m_dotsOpen = false; openHnpStyle(); }});
-    m_dotsTiles.push_back({"Films", "play", nxui::Color(0.9f, 0.1f, 0.15f, 1.f), [this]() { m_dotsOpen = false; openHnpStreaming(); }});
+    m_dotsTiles.push_back({"Rechercher", "tag", nxui::Color(0.95f, 0.55f, 0.2f, 1.f), [this]() { m_dotsOpen = false; openHnpSearch(); }});
 #endif
     m_dotsTiles.push_back({"Power", "power", nxui::Color(1.f, 0.36f, 0.36f, 1.f), [this]() { openPower(); }});
 #ifndef SWITCHU_MENU
@@ -9195,6 +9245,11 @@ void CardsActivity::onUpdate(float dt) {
     if (bDown && m_zone != Zone::Cards) m_zone = Zone::Cards;
     if (in.isDown(B::Plus)) openOptions();
     if (in.isDown(B::X)) askClose();
+#ifdef HNP_PLUS
+    if (in.isDown(B::Y)) openHnpSearch();      // HomeNX+ : chercher par nom (idee de tomvita/SwitchU)
+    if (in.isDown(B::LStick)) openHnp();      // HomeNX+ : clic du stick gauche = panneau HomeNX+
+    hnpKeyboard();
+#endif
     if (in.isDown(B::Minus)) openNotifications();
     if (in.isDown(B::L)) openDiscord();
     if (in.isDown(B::R)) openQuick();

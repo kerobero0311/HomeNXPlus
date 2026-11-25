@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="fr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HomeNX+ Trailer</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Manrope:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Mise en page : une scène 16:9 façon écran de console qui joue la bande-annonce, puis le détail lisible dessous. */
+:root {
+  --ink: #0a0c11;
+  --panel: #141822;
+  --line: #262c3b;
+  --text: #eef1f7;
+  --muted: #98a1b5;
+  --red: #ff4b3e;
+  --teal: #2de0c8;
+  --amber: #ffb020;
+  --display: "Unbounded", "Arial Black", system-ui, sans-serif;
+  --body: "Manrope", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { background: var(--ink); color: var(--text); }
+body {
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 56px;
+}
+.wrap { max-width: 1080px; margin: 0 auto; display: grid; gap: 28px; }
+header.top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; }
+.brand { font-family: var(--display); font-weight: 800; font-size: clamp(22px, 3.2vw, 30px); letter-spacing: -0.01em; }
+.brand b { color: var(--red); }
+.tag { font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* ---------- la console ---------- */
+.device { display: grid; grid-template-columns: 7% 1fr 7%; align-items: stretch; max-width: 100%; }
+.rail { border-radius: 28px 0 0 28px; background: linear-gradient(180deg, #1d6fd6, #12489a); position: relative; }
+.rail.right { border-radius: 0 28px 28px 0; background: linear-gradient(180deg, #e8473c, #b32c23); }
+.rail::after { content: ""; position: absolute; left: 50%; top: 22%; width: 38%; aspect-ratio: 1; transform: translateX(-50%); border-radius: 50%; background: rgba(0,0,0,.35); box-shadow: 0 0 0 3px rgba(255,255,255,.08) inset; }
+.rail.right::after { top: auto; bottom: 30%; }
+.body { background: #1a1d24; padding: 3.2% 3.6%; border-block: 1px solid #2b303b; }
+.stage {
+  position: relative; aspect-ratio: 16 / 9; width: 100%; max-width: 100%;
+  border-radius: 10px; overflow: hidden; background: radial-gradient(120% 90% at 30% 10%, #1b2233 0%, #0b0e15 60%);
+  box-shadow: 0 0 0 1px #000 inset;
+  container-type: inline-size;
+}
+.scene { position: absolute; inset: 0; padding: 6cqw 6.5cqw; display: flex; flex-direction: column; justify-content: center; gap: 2.2cqw; opacity: 0; transform: scale(1.03); transition: opacity .6s ease, transform .9s cubic-bezier(.2,.7,.2,1); pointer-events: none; }
+.scene.on { opacity: 1; transform: none; }
+.kicker { font-family: var(--mono); font-size: 1.6cqw; letter-spacing: .14em; text-transform: uppercase; color: var(--teal); }
+.big { font-family: var(--display); font-weight: 800; font-size: 6.4cqw; line-height: 1.02; letter-spacing: -0.02em; text-wrap: balance; margin: 0; }
+.mid { font-family: var(--display); font-weight: 700; font-size: 3.6cqw; line-height: 1.1; margin: 0; text-wrap: balance; }
+.sub { font-size: 2cqw; color: var(--muted); max-width: 70%; margin: 0; }
+.big em, .mid em { font-style: normal; color: var(--red); }
+
+/* barre du haut + cartes */
+.topbar { display: flex; gap: 1.2cqw; align-items: center; }
+.dot { width: 4.2cqw; aspect-ratio: 1; border-radius: 50%; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); }
+.pill { flex: 1; height: 4.2cqw; border-radius: 99px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1); display: flex; align-items: center; gap: 2cqw; padding: 0 2cqw; font-family: var(--mono); font-size: 1.4cqw; color: var(--muted); }
+.cards { display: flex; gap: 2cqw; align-items: center; }
+.card { flex: 0 0 15cqw; aspect-ratio: 240 / 340; border-radius: 1.6cqw; position: relative; overflow: hidden; box-shadow: 0 1.2cqw 3cqw rgba(0,0,0,.5); transform: translateY(2cqw); opacity: .0; transition: transform .7s cubic-bezier(.2,.8,.2,1), opacity .5s; }
+.on .card { transform: none; opacity: 1; }
+.on .card:nth-child(2) { transition-delay: .08s } .on .card:nth-child(3) { transition-delay: .16s } .on .card:nth-child(4) { transition-delay: .24s } .on .card:nth-child(5) { transition-delay: .32s }
+.card.sel { flex-basis: 17cqw; outline: .35cqw solid #fff; outline-offset: .35cqw; }
+.card span { position: absolute; left: 1.2cqw; bottom: 1.2cqw; right: 1.2cqw; font-family: var(--display); font-weight: 700; font-size: 1.5cqw; line-height: 1.1; }
+.c1 { background: linear-gradient(160deg, #ff7a59, #b0231c); } .c2 { background: linear-gradient(160deg, #3fd18a, #0f6b4c); }
+.c3 { background: linear-gradient(160deg, #6aa8ff, #233f9c); } .c4 { background: linear-gradient(160deg, #ffd166, #c26d0a); } .c5 { background: linear-gradient(160deg, #c084fc, #5b2a91); }
+.styleSwitch { display: inline-flex; gap: .6cqw; padding: .5cqw; border-radius: 99px; background: rgba(255,255,255,.08); font-family: var(--mono); font-size: 1.4cqw; }
+.styleSwitch i { font-style: normal; padding: .5cqw 1.6cqw; border-radius: 99px; }
+.styleSwitch i.a { background: var(--text); color: var(--ink); animation: flip 3.2s steps(1) infinite; }
+.styleSwitch i.b { animation: flip 3.2s steps(1) infinite reverse; }
+@keyframes flip { 0%,49% { background: var(--text); color: var(--ink); } 50%,100% { background: transparent; color: var(--text); } }
+
+/* Claude */
+.chat { display: grid; gap: 1.4cqw; max-width: 72%; }
+.bubble { padding: 1.4cqw 2cqw; border-radius: 2cqw; font-size: 1.9cqw; line-height: 1.4; }
+.me { justify-self: end; background: #2a3247; border-bottom-right-radius: .5cqw; }
+.ai { background: #f3efe7; color: #1d1a16; border-bottom-left-radius: .5cqw; }
+.ai b { color: #c2410c; }
+.typing::after { content: "▍"; animation: blink 1s steps(1) infinite; color: #c2410c; }
+@keyframes blink { 50% { opacity: 0 } }
+
+/* tuiles médias / mondes */
+.tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.4cqw; }
+.tile { border-radius: 1.4cqw; padding: 1.6cqw; min-height: 9cqw; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); display: flex; flex-direction: column; justify-content: space-between; gap: .6cqw; opacity: 0; transform: translateY(1.2cqw); transition: .6s cubic-bezier(.2,.8,.2,1); }
+.on .tile { opacity: 1; transform: none; }
+.on .tile:nth-child(2){transition-delay:.06s}.on .tile:nth-child(3){transition-delay:.12s}.on .tile:nth-child(4){transition-delay:.18s}.on .tile:nth-child(5){transition-delay:.24s}.on .tile:nth-child(6){transition-delay:.3s}.on .tile:nth-child(7){transition-delay:.36s}.on .tile:nth-child(8){transition-delay:.42s}
+.tile b { font-family: var(--display); font-size: 1.9cqw; font-weight: 700; }
+.tile small { font-family: var(--mono); font-size: 1.2cqw; color: var(--muted); }
+.tile.pc { border-color: rgba(45,224,200,.45); }
+.tile.pc small { color: var(--teal); }
+
+/* overlay en jeu */
+.game { position: absolute; inset: 0; background: linear-gradient(180deg, #4b7bd6 0%, #9fd0ff 45%, #5aa24c 46%, #2f6d2a 100%); }
+.game::after { content: ""; position: absolute; left: 58%; bottom: 30%; width: 7cqw; aspect-ratio: 1; border-radius: 30% 30% 20% 20%; background: #f5d9a0; box-shadow: 0 0 0 .6cqw #c23b22; }
+.ovl { position: absolute; left: 0; top: 0; bottom: 0; width: 36%; background: rgba(10,12,17,.9); border-right: 1px solid rgba(255,255,255,.12); padding: 3cqw 2.6cqw; display: flex; flex-direction: column; gap: 1.6cqw; transform: translateX(-100%); transition: transform .8s cubic-bezier(.2,.8,.2,1) .4s; }
+.on .ovl { transform: none; }
+.ovl h4 { margin: 0; font-family: var(--display); font-size: 2cqw; }
+.row { display: flex; justify-content: space-between; font-size: 1.6cqw; padding: 1cqw 1.2cqw; border-radius: 1cqw; background: rgba(255,255,255,.06); }
+.row em { font-style: normal; color: var(--amber); font-family: var(--mono); }
+.bar { height: .9cqw; border-radius: 99px; background: rgba(255,255,255,.1); overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--teal); transition: width 1.6s ease 1s; }
+.on .bar i { width: 62%; }
+.ovlcap { position: absolute; right: 5cqw; bottom: 5cqw; max-width: 46%; text-align: right; }
+
+/* Linux */
+.hekate { font-family: var(--mono); font-size: 1.6cqw; display: grid; gap: .8cqw; max-width: 46%; }
+.hekate div { padding: 1cqw 1.6cqw; border-radius: .8cqw; background: rgba(255,255,255,.06); }
+.hekate .pick { background: var(--teal); color: var(--ink); font-weight: 600; }
+.desk { position: absolute; right: 5cqw; top: 13cqw; width: 44%; border-radius: 1.2cqw; overflow: hidden; border: 1px solid rgba(255,255,255,.14); background: #10131b; opacity: 0; transform: translateY(2cqw); transition: .7s ease .5s; }
+.on .desk { opacity: 1; transform: none; }
+.desk .t { font-family: var(--mono); font-size: 1.2cqw; padding: .8cqw 1.2cqw; background: #1c2130; color: var(--muted); }
+.desk pre { margin: 0; padding: 1.4cqw; font-family: var(--mono); font-size: 1.3cqw; line-height: 1.6; color: #b7f7d8; white-space: pre-wrap; }
+.apps { display: flex; flex-wrap: wrap; gap: .8cqw; padding: 0 1.4cqw 1.4cqw; }
+.apps span { font-family: var(--mono); font-size: 1.15cqw; padding: .4cqw 1cqw; border-radius: 99px; background: rgba(255,255,255,.08); }
+
+/* PC */
+.pcline { display: flex; align-items: center; gap: 2cqw; }
+.box { padding: 1.6cqw 2cqw; border-radius: 1.4cqw; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); font-family: var(--display); font-size: 1.9cqw; }
+.beam { flex: 1; height: .5cqw; border-radius: 99px; background: linear-gradient(90deg, transparent, var(--teal), transparent); background-size: 50% 100%; background-repeat: no-repeat; animation: beam 1.4s linear infinite; opacity: .9; }
+@keyframes beam { from { background-position: -50% 0 } to { background-position: 150% 0 } }
+.chips { display: flex; flex-wrap: wrap; gap: 1cqw; }
+.chips span { font-family: var(--mono); font-size: 1.35cqw; padding: .7cqw 1.4cqw; border-radius: 99px; border: 1px solid rgba(255,255,255,.16); }
+
+/* fin */
+.end { align-items: flex-start; }
+.end .big { font-size: 7.6cqw; }
+.end .gh { font-family: var(--mono); font-size: 1.8cqw; color: var(--teal); }
+
+.progress { position: absolute; left: 0; right: 0; bottom: 0; height: .5cqw; background: rgba(255,255,255,.08); }
+.progress i { display: block; height: 100%; width: 0; background: var(--red); }
+
+/* ---------- commandes ---------- */
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+button { font: 600 14px var(--body); color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: 99px; padding: 9px 16px; cursor: pointer; }
+button:hover { border-color: #3a4357; }
+button:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+button.main { background: var(--red); border-color: var(--red); color: #fff; }
+.chap { display: flex; flex-wrap: wrap; gap: 6px; }
+.chap button { font-size: 12.5px; padding: 6px 12px; color: var(--muted); }
+.chap button[aria-current="true"] { color: var(--ink); background: var(--text); border-color: var(--text); }
+
+/* ---------- détail ---------- */
+.detail { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px 28px; }
+.detail section { min-width: 0; border-top: 1px solid var(--line); padding-top: 14px; }
+.detail h3 { font-family: var(--display); font-weight: 700; font-size: 17px; margin: 0 0 6px; }
+.detail p { margin: 0; color: var(--muted); font-size: 15px; }
+.note { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; }
+
+@media (max-width: 560px) {
+  .device { grid-template-columns: 0 1fr 0; }
+  .rail { display: none; }
+  .body { padding: 10px; border-radius: 14px; border: 1px solid #2b303b; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scene, .card, .tile, .ovl, .desk, .bar i { transition: none !important; }
+  .styleSwitch i, .typing::after, .beam { animation: none !important; }
+}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">HomeNX<b>+</b></div>
+    <div class="tag">Switch V1 · Atmosphère · Kubuntu · Claude</div>
+  </header>
+
+  <div class="device" aria-label="Bande-annonce">
+    <div class="rail" aria-hidden="true"></div>
+    <div class="body">
+      <div class="stage" id="stage">
+
+        <div class="scene on" data-t="4200" data-name="Ouverture">
+          <div class="kicker">Une console modifiée, entièrement à moi</div>
+          <h1 class="big">Une Switch.<br><em>Quatre</em> mondes.</h1>
+          <p class="sub">Un menu HOME refait, Claude intégré, les films du PC et un vrai Linux. Sans toucher au système.</p>
+        </div>
+
+        <div class="scene" data-t="5600" data-name="Menu HOME">
+          <div class="topbar"><div class="dot"></div><div class="dot"></div><div class="pill">12:42 · 87 % · 13,1 Go libres · 35°</div><div class="dot"></div><div class="dot"></div></div>
+          <div class="cards">
+            <div class="card c1"><span>Aventure</span></div>
+            <div class="card c2 sel"><span>Plateforme</span></div>
+            <div class="card c3"><span>Course</span></div>
+            <div class="card c4"><span>Fête</span></div>
+            <div class="card c5"><span>RPG</span></div>
+          </div>
+          <div style="display:flex;gap:2.4cqw;align-items:center;flex-wrap:wrap">
+            <p class="mid">Mon menu <em>HOME</em>, mes règles.</p>
+            <div class="styleSwitch" aria-hidden="true"><i class="a">Cartes</i><i class="b">Wii U</i></div>
+          </div>
+          <p class="sub">Deux apparences et un bouton Style pour passer de l'une à l'autre. Pages Récents, Plus joués et Jamais lancés, mises à jour toutes seules.</p>
+        </div>
+
+        <div class="scene" data-t="6200" data-name="Claude">
+          <div class="kicker">Claude, dans le menu et en appli</div>
+          <div class="chat">
+            <div class="bubble me">Que dois-je faire ici ? <span style="opacity:.6">(capture jointe)</span></div>
+            <div class="bubble ai typing">Monte sur la plateforme de gauche, puis <b>tire l'interrupteur</b> : la porte du donjon s'ouvre derrière la cascade.</div>
+          </div>
+          <p class="sub">Aide sur une capture, traduction en français, checklist à 100 % d'un jeu. Plafond de dépense mensuel, rien n'est envoyé sans ton accord.</p>
+        </div>
+
+        <div class="scene" data-t="6200" data-name="Médias">
+          <div class="kicker">Page Médias</div>
+          <div class="tiles">
+            <div class="tile pc"><b>Netflix</b><small>par le PC</small></div>
+            <div class="tile pc"><b>Disney+</b><small>par le PC</small></div>
+            <div class="tile pc"><b>Prime Video</b><small>par le PC</small></div>
+            <div class="tile pc"><b>Spotify</b><small>par le PC</small></div>
+            <div class="tile"><b>Plex · Jellyfin</b><small>GMCA, Switchfin</small></div>
+            <div class="tile"><b>YouTube</b><small>NewPipe, sans pub</small></div>
+            <div class="tile"><b>Mes films</b><small>SwitchWave, 4K</small></div>
+            <div class="tile"><b>Discord</b><small>intégré</small></div>
+          </div>
+          <p class="mid">Films, séries, musique : <em>un appui</em>.</p>
+        </div>
+
+        <div class="scene" data-t="5200" data-name="Rétro">
+          <div class="kicker">Toute une ludothèque</div>
+          <div class="tiles">
+            <div class="tile"><b>Wii · GameCube</b><small>tico</small></div>
+            <div class="tile"><b>Rétro</b><small>tico, consoles 8 à 64 bits</small></div>
+            <div class="tile"><b>Wii U</b><small>Cemu</small></div>
+            <div class="tile"><b>Jeux du PC</b><small>Moonlight</small></div>
+          </div>
+          <p class="mid">Les meilleures versions, <em>une seule fois</em>.</p>
+        </div>
+
+        <div class="scene" data-t="6000" data-name="En jeu">
+          <div class="game" aria-hidden="true"></div>
+          <div class="ovl">
+            <h4>HomeNX+ en jeu</h4>
+            <div class="row">Scène <em>Batterie</em></div>
+            <div class="row">Batterie <em>64 %</em></div>
+            <div>
+              <div class="row" style="margin-bottom:.8cqw">Checklist <em>62 %</em></div>
+              <div class="bar"><i></i></div>
+            </div>
+            <div class="row" style="font-size:1.35cqw">Note : la clé est derrière la cascade</div>
+          </div>
+          <div class="ovlcap">
+            <p class="mid">Sans quitter <em>la partie</em>.</p>
+            <p class="sub" style="max-width:none">Un overlay : notes, checklist à cocher, scènes de fréquences et de luminosité.</p>
+          </div>
+        </div>
+
+        <div class="scene" data-t="6200" data-name="Linux">
+          <div class="kicker">Hekate · démarrage</div>
+          <div class="hekate">
+            <div>HomeNX</div>
+            <div class="pick">Linux (Kubuntu)</div>
+            <div>Atmosphère officiel</div>
+          </div>
+          <div class="desk">
+            <div class="t">kerobero@switch : ~</div>
+            <pre>$ claude
+Claude Code prêt sur la Switch.
+$ bash rapport_sante.sh
+batterie 81 %  ·  SD 13 Go libres</pre>
+            <div class="apps"><span>Chromium</span><span>VLC</span><span>RetroArch</span><span>Dolphin</span><span>mGBA</span></div>
+          </div>
+          <p class="mid" style="max-width:48%">Un vrai <em>PC Linux</em> dans la poche.</p>
+        </div>
+
+        <div class="scene" data-t="5600" data-name="PC">
+          <div class="kicker">Le PC à portée de manette</div>
+          <div class="pcline"><div class="box">Switch</div><div class="beam" aria-hidden="true"></div><div class="box">PC</div></div>
+          <div class="chips"><span>Réveil à distance</span><span>Saves sauvegardées</span><span>Captures copiées</span><span>Boîte aux lettres</span><span>Netflix &amp; co</span></div>
+          <p class="sub">Un petit compagnon sur le PC, sur le réseau de la maison seulement, protégé par un jeton.</p>
+        </div>
+
+        <div class="scene" data-t="4800" data-name="Fiabilité">
+          <div class="kicker">Pensé pour ne jamais casser</div>
+          <p class="big" style="font-size:5.4cqw">Mode sans échec.<br>Plan de secours.<br><em>Zéro</em> fichier système.</p>
+        </div>
+
+        <div class="scene end" data-t="6000" data-name="Fin">
+          <div class="kicker">Logiciel libre · GPL-3.0</div>
+          <p class="big">HomeNX<em>+</em></p>
+          <p class="sub">D'après HomeNX et SwitchU. Bientôt sur GitHub.</p>
+          <div class="gh">github.com/kerobero0311</div>
+        </div>
+
+        <div class="progress" aria-hidden="true"><i id="bar"></i></div>
+      </div>
+    </div>
+    <div class="rail right" aria-hidden="true"></div>
+  </div>
+
+  <div class="controls">
+    <button class="main" id="play" type="button">Pause</button>
+    <button id="again" type="button">Revoir</button>
+    <a href="index.html" style="color:var(--muted);font-size:14px;margin-left:auto">Accueil du dossier</a>
+    <div class="chap" id="chap"></div>
+  </div>
+
+  <div class="detail">
+    <section><h3>Menu HOME</h3><p>Apparence Cartes ou Wii U, bouton Style, pages intelligentes, fiche de jeu avec notes et checklist, scène appliquée au lancement d'un jeu.</p></section>
+    <section><h3>Claude</h3><p>Questions, aide sur la dernière capture, traduction, checklist de complétion. En appli autonome (ClaudeNX) et sous Linux avec Claude Code.</p></section>
+    <section><h3>Médias</h3><p>Netflix, Disney+, Prime Video et Spotify ouverts sur le PC et regardés par Moonlight ; Plex, Jellyfin, YouTube, films en 4K et Discord directement.</p></section>
+    <section><h3>Jeux</h3><p>Wii, GameCube et rétro avec tico, Wii U avec Cemu, jeux du PC avec Moonlight.</p></section>
+    <section><h3>Linux</h3><p>Kubuntu en double démarrage : Chromium, VLC, RetroArch, Dolphin, outils de secours et rapport de santé.</p></section>
+    <section><h3>Fiabilité</h3><p>Mode sans échec après 3 démarrages ratés, garde batterie à 15 % et 8 %, plan de secours sous Windows et Linux, aucun fichier système modifié.</p></section>
+  </div>
+
+  <p class="note">Aucune clé, aucun firmware ni aucun jeu n'est fourni. Netflix, Disney+, Prime Video et Spotify n'ont pas d'appli Switch : ils tournent sur le PC et s'affichent par Moonlight. Les noms cités appartiennent à leurs propriétaires.</p>
+</div>
+
+<script>
+(function () {
+  const scenes = Array.from(document.querySelectorAll('.scene'));
+  const bar = document.getElementById('bar');
+  const playBtn = document.getElementById('play');
+  const chap = document.getElementById('chap');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const total = scenes.reduce((s, el) => s + Number(el.dataset.t), 0);
+  let i = 0, playing = !reduce, start = performance.now(), elapsedInScene = 0, raf = 0;
+
+  scenes.forEach((el, n) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = el.dataset.name;
+    b.addEventListener('click', () => { show(n); elapsedInScene = 0; start = performance.now(); });
+    chap.appendChild(b);
+  });
+
+  function show(n) {
+    i = (n + scenes.length) % scenes.length;
+    scenes.forEach((el, k) => el.classList.toggle('on', k === i));
+    Array.from(chap.children).forEach((b, k) => b.setAttribute('aria-current', k === i ? 'true' : 'false'));
+  }
+  function before(n) { let s = 0; for (let k = 0; k < n; k++) s += Number(scenes[k].dataset.t); return s; }
+
+  function tick(now) {
+    if (playing) {
+      const dur = Number(scenes[i].dataset.t);
+      elapsedInScene = now - start;
+      if (elapsedInScene >= dur) {
+        if (i === scenes.length - 1) { playing = false; playBtn.textContent = 'Lecture'; elapsedInScene = dur; }
+        else { show(i + 1); start = now; elapsedInScene = 0; }
+      }
+    }
+    bar.style.width = (Math.min(1, (before(i) + elapsedInScene) / total) * 100) + '%';
+    raf = requestAnimationFrame(tick);
+  }
+
+  playBtn.addEventListener('click', () => {
+    playing = !playing;
+    if (playing) {
+      if (i === scenes.length - 1 && elapsedInScene >= Number(scenes[i].dataset.t)) show(0), elapsedInScene = 0;
+      start = performance.now() - elapsedInScene;
+    }
+    playBtn.textContent = playing ? 'Pause' : 'Lecture';
+  });
+  document.getElementById('again').addEventListener('click', () => {
+    show(0); elapsedInScene = 0; start = performance.now(); playing = true; playBtn.textContent = 'Pause';
+  });
+
+  show(0);
+  playBtn.textContent = playing ? 'Pause' : 'Lecture';
+  raf = requestAnimationFrame(tick);
+})();
+</script>

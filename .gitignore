@@ -30,3 +30,8 @@ api_key.txt
 __pycache__/
 
 projects/overlay/build/
+
+# rushes du trailer (vidéos lourdes, hors git)
+promo/tournage/rushes/
+promo/tournage/telephone/
+dist/

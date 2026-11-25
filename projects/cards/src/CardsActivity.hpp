@@ -814,6 +814,18 @@ private:
     void hnpWatch(const std::string& service, const std::string& name);
     std::function<void(const std::string&)> m_hnpDone;
     void hnpPoll();
+    void hnpSceneForLaunch(std::uint64_t id);        // applique la scene choisie pour ce jeu
+    void openHnpChecklist(const std::string& tid, const std::string& name); // cocher dans le menu
+    void openHnpSearch(const std::string& initial = {});  // Y ou clavier USB : chercher un jeu ou une appli
+    void hnpSearchResults(const std::string& query);
+    void hnpKeyboard();                                     // une lettre tapee au clavier USB lance la recherche
+    void hnpAssistSort();                                   // Claude propose des pages par genre
+    void hnpPlayPc();                                       // reveille le PC puis lance Moonlight
+    bool m_hnpKbdReady = false;
+    std::uint64_t m_hnpKbdPrev[4] = {};
+    std::string m_hnpBusy;                           // message garde a l'ecran pendant une tache
+    std::uint64_t m_hnpBatTick = 0;                  // derniere lecture de la batterie
+    bool m_hnpStarted = false;
     std::future<std::string> m_hnpJob;
     std::string m_hnpJobTitle;
     bool m_hnpJobReader = false;

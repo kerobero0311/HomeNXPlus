@@ -226,7 +226,7 @@ target("SwitchU")
     end
     -- HomeNX+ : webpdemux dépend de webp ; sous Windows l'ordre des paquets met
     -- -lwebp avant -lwebpdemux, donc on relie webp une seconde fois après.
-    add_syslinks("webp", "mbedtls", "mbedx509", "mbedcrypto", "nx")
+    add_syslinks("webp", "mbedtls", "mbedx509", "mbedcrypto", "drm_nouveau", "nx")  -- drm_nouveau : EGL en a besoin, apres lui
 
     if is_mode("release") then
         add_cxflags("-O3", "-ffast-math", {force = true})

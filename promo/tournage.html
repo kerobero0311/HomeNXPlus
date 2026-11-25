@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tournage du trailer</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700&family=Manrope:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Mise en page : feuille de tournage, une ligne par plan, cases à cocher gardées dans ce navigateur ; imprimable. */
+:root {
+  --bg: #f6f7fa; --paper: #fff; --ink: #161922; --muted: #5b6273; --line: #dfe2ea; --red: #d93a2e; --teal: #0f8f7e; --chip: #eef0f5;
+  --display: "Unbounded", "Arial Black", system-ui, sans-serif; --body: "Manrope", "Segoe UI", system-ui, sans-serif; --mono: "JetBrains Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #0e1016; --paper: #161923; --ink: #eceff5; --muted: #9aa2b4; --line: #282d3a; --red: #ff6a5c; --teal: #38d9c3; --chip: #20242f; color-scheme: dark } }
+:root[data-theme="dark"] { --bg: #0e1016; --paper: #161923; --ink: #eceff5; --muted: #9aa2b4; --line: #282d3a; --red: #ff6a5c; --teal: #38d9c3; --chip: #20242f; color-scheme: dark }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.55 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 24px 56px; }
+.doc { max-width: 960px; margin: 0 auto; background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: clamp(18px, 4vw, 40px); display: grid; gap: 22px; }
+h1 { font: 700 clamp(26px, 4.6vw, 36px)/1.1 var(--display); margin: 0; }
+h2 { font: 600 18px var(--display); margin: 0; }
+p { margin: 0; max-width: 70ch; }
+.eyebrow { font: 600 12px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--teal); }
+.ways { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.way { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: grid; gap: 4px; min-width: 0; }
+.way b { font-family: var(--display); font-size: 14px; }
+.way span { color: var(--muted); font-size: 14px; }
+.tablewrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 8px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+td.t { font: 600 12.5px var(--mono); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.how { font: 600 11.5px var(--mono); padding: 2px 8px; border-radius: 99px; background: var(--chip); white-space: nowrap; }
+.how.tel { color: var(--red); } .how.cap { color: var(--teal); }
+input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--red); }
+tr.done td:not(:first-child) { opacity: .5; }
+.prog { font: 600 13px var(--mono); color: var(--muted); }
+code, kbd { font: .88em var(--mono); background: var(--chip); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; }
+ol { margin: 0; padding-left: 22px; display: grid; gap: 4px; }
+a { color: var(--red); }
+@media print { :root { --bg: #fff; --paper: #fff; color-scheme: light } body { padding: 0 } .doc { border: 0; padding: 0 } @page { size: A4 landscape; margin: 12mm } }
+</style>
+</head>
+<body>
+<div class="doc">
+  <div class="eyebrow">Trailer réel · environ 2 minutes · 15 plans</div>
+  <h1>Tournage du trailer</h1>
+  <p>Filme chaque plan, coche-le ici, puis remets la carte SD dans l'Ally : je récupère tout et je monte la vidéo dans Clipchamp (titres, musique, transitions).</p>
+
+  <div class="ways">
+    <div class="way" style="border-color:var(--teal)"><b>Switch Frame Tap par câble (le meilleur)</b><span>Filme tout, menu HOME compris, en MP4 sur le PC, avec le son, en mode portable. Réglage une fois ci-dessous, puis <kbd>R</kbd> dans la fenêtre du PC pour enregistrer, <kbd>R</kbd> pour arrêter.</span></div>
+    <div class="way"><b>Bouton Capture de la Switch</b><span>Appui court : photo. Appui long (1 s) : les 30 dernières secondes en vidéo. Marche dans les jeux, et en général dans les applis lancées avec R.</span></div>
+    <div class="way"><b>Téléphone</b><span>Seulement pour l'injection et Hekate (avant que la console ait démarré). À l'horizontale, 60 images/s, luminosité au maximum, sans reflet.</span></div>
+    <div class="way"><b>Sous Linux</b><span>Dans Konsole : <code>bash "/media/$USER/SWITCH SD/switchroot/outils/homenxplus/filmer_ecran.sh" 20</code> (20 secondes).</span></div>
+  </div>
+
+  <h2>Switch Frame Tap par câble USB : réglage une seule fois</h2>
+  <ol>
+    <li>Démarre la Switch sur <b>HomeNX</b>, attends 30 secondes, puis ouvre l'appli <b>Switch Frame Tap</b> (menu homebrew). Page <b>Beta</b> : active <b>Stream the HOME menu</b>. Redémarre la console.</li>
+    <li>Switch <b>en mode portable</b> (pas sur le dock), branchée à l'Ally avec le câble USB-C.</li>
+    <li>Sur le PC, lance <code>Desktop\Emulateurs\SwitchFrameTap\zadig-2.9.exe</code> (accepte la question de Windows).</li>
+    <li>Menu <b>Options</b> &gt; <b>List All Devices</b>. Dans la liste, choisis <b>Switch Frame Tap</b> (identifiant USB <code>1209 5F1E</code>). Vérifie bien le nom : pas la souris ni le clavier.</li>
+    <li>À droite, choisis <b>WinUSB</b>, puis <b>Install Driver</b> (ou Replace Driver). Attends la fin.</li>
+  </ol>
+  <h2>À chaque tournage</h2>
+  <ol>
+    <li>Switch en mode portable, câble branché, sur HomeNX depuis 30 secondes.</li>
+    <li>Lance <code>SwitchFrameTap.exe</code> (dans <code>Desktop\Emulateurs\SwitchFrameTap\switch-frame-tap-0.7.23-windows-viewer</code>). L'écran de la Switch apparaît.</li>
+    <li><kbd>R</kbd> enregistre, <kbd>R</kbd> arrête. Les MP4 vont dans <code>Vidéos\Switch Frame Tap</code>.</li>
+    <li>Pour un jeu en 1080p par câble : active ReverseNX-RT en mode « Docked » dans l'overlay.</li>
+    <li>Après le tournage, tu peux couper le module : Ultrahand &gt; Sysmodules &gt; Switch Frame Tap.</li>
+  </ol>
+  <p>Sans câble (moins stable) : active <b>Network streaming</b> dans l'appli, même Wi-Fi que le PC, et accepte l'accès réseau privé que Windows demande.</p>
+
+  <div class="prog" id="prog">0 / 15 plans filmés</div>
+  <div class="tablewrap"><table>
+    <thead><tr><th></th><th>Temps</th><th>Plan</th><th>Ce qu'on voit</th><th>Comment</th><th>Texte à l'écran</th></tr></thead>
+    <tbody id="plans"></tbody>
+  </table></div>
+
+  <h2>Ensuite</h2>
+  <ol>
+    <li>Remets la carte SD dans l'Ally et dis-moi « rushes prêts ».</li>
+    <li>Les vidéos de Switch Frame Tap sont déjà sur le PC (<code>Vidéos\Switch Frame Tap</code>) : rien à faire.</li>
+    <li>Envoie les vidéos du téléphone dans <code>HomeNXPlus\promo\tournage\telephone\</code> (câble ou Phone Link).</li>
+    <li>Je lance <code>outils\recuperer_tournage.ps1</code> (lecture seule sur la carte), puis je monte le trailer dans Clipchamp et j'exporte en 1080p.</li>
+  </ol>
+  <p><a href="index.html">Retour à l'accueil</a></p>
+</div>
+<script>
+const PLANS = [
+  ['0:00', 'Ouverture', 'La Switch éteinte, puis l\'injection depuis l\'Ally (TegraRcmGUI, Inject)', 'tel', 'Une Switch. Quatre mondes.'],
+  ['0:06', 'Hekate', 'Le menu Hekate, choix de « HomeNX »', 'tel', 'Un menu de démarrage, trois systèmes'],
+  ['0:14', 'Menu HOME', 'Les cartes qui défilent, ZL / ZR entre les pages', 'ftap', 'Mon menu HOME'],
+  ['0:24', 'HomeNX+', 'Ouvrir HomeNX+, les trois points, le panneau HomeNX+', 'cap', 'HomeNX+ : tout à portée'],
+  ['0:34', 'Style', 'Style > Wii U, le menu redémarre, puis retour aux Cartes', 'cap', 'Deux apparences, un bouton'],
+  ['0:42', 'Recherche', 'Y, taper « mario », choisir un résultat', 'cap', 'Trouver un jeu en 2 secondes'],
+  ['0:50', 'Claude', 'Poser une question et voir la réponse s\'afficher', 'cap', 'Claude intégré'],
+  ['1:00', 'Que faire ici ?', 'Une capture en jeu, puis « Que faire ici ? »', 'cap', 'Bloqué ? Claude regarde ta capture'],
+  ['1:08', 'Fiche de jeu', '+ sur un jeu > Fiche HomeNX+, cocher la checklist', 'cap', 'Notes et checklist à 100 %'],
+  ['1:16', 'Médias', 'La page Médias, ouvrir SwitchWave ou GMCA, puis NewPipe', 'cap', 'Films, séries, musique'],
+  ['1:26', 'Netflix par le PC', 'Carte Netflix : le PC se réveille, Moonlight affiche Netflix', 'ftap', 'Même Netflix, par le PC'],
+  ['1:34', 'Jeux', '10 s d\'un jeu Switch, puis 10 s de tico (Wii ou GameCube)', 'cap', 'Toute une ludothèque'],
+  ['1:44', 'En jeu', 'L + ↓ + R3 : l\'overlay HomeNX+ (notes, scène Batterie)', 'ftap', 'Sans quitter la partie'],
+  ['1:52', 'Linux', 'Bureau Kubuntu : Chromium, VLC, puis Claude Code dans Konsole', 'linux', 'Un vrai PC Linux dans la poche'],
+  ['2:02', 'Fin', 'Le menu HOME, puis la Switch posée (téléphone)', 'ftap', 'HomeNX+ · logiciel libre · bientôt sur GitHub'],
+];
+const HOW = { tel: ['tel', 'Téléphone'], cap: ['cap', 'Capture ou Frame Tap'], linux: ['cap', 'Linux'], ftap: ['cap', 'Frame Tap'] };
+let done = {};
+try { done = JSON.parse(localStorage.getItem('tournage-faits') || '{}') || {}; } catch (e) { done = {}; }
+const tb = document.getElementById('plans');
+function render() {
+  tb.textContent = '';
+  PLANS.forEach(([t, name, what, how, title], i) => {
+    const tr = document.createElement('tr'); if (done[i]) tr.className = 'done';
+    const c = document.createElement('td'); const cb = document.createElement('input'); cb.type = 'checkbox'; cb.id = 'plan' + i; cb.checked = !!done[i];
+    cb.setAttribute('aria-label', 'Plan ' + (i + 1) + ' filmé'); cb.onchange = () => { done[i] = cb.checked; try { localStorage.setItem('tournage-faits', JSON.stringify(done)); } catch (e) {} render(); };
+    c.append(cb); tr.append(c);
+    for (const [cls, txt] of [['t', t], ['', name], ['', what]]) { const td = document.createElement('td'); if (cls) td.className = cls; td.textContent = txt; if (!cls && txt === name) td.style.fontWeight = 600; tr.append(td); }
+    const h = document.createElement('td'); const s = document.createElement('span'); s.className = 'how ' + HOW[how][0]; s.textContent = HOW[how][1]; h.append(s); tr.append(h);
+    const ti = document.createElement('td'); ti.textContent = '« ' + title + ' »'; tr.append(ti);
+    tb.append(tr);
+  });
+  document.getElementById('prog').textContent = Object.values(done).filter(Boolean).length + ' / ' + PLANS.length + ' plans filmés';
+}
+render();
+</script>
+</body>
+</html>

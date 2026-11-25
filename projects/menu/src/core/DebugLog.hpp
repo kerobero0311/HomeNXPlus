@@ -77,6 +77,7 @@ public:
         switchu::FileLog::log("%s", buf);
 #else
         self.m_sink.append(line);
+        if (++self.m_written < 400) self.m_sink.flush();  // HomeNX+ : un plantage au demarrage ne perd rien
         std::fprintf(stderr, "%s\n", line.c_str());
 #endif
     }
@@ -117,4 +118,5 @@ private:
     std::mutex m_mutex;
     std::vector<std::string> m_lines;
     switchu::log_detail::buffered_sink m_sink;
+    int m_written = 0;  // HomeNX+ : lignes ecrites (les premieres partent tout de suite)
 };

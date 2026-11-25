@@ -64,7 +64,7 @@ Choix par défaut, faute de réponse précise, à revoir quand l'utilisateur le 
 | Q1 Nom | **HomeNX+** (dossiers `HomeNXPlus`) | nom du cahier des charges |
 | Q2 Style | **CardsNX sombre** (cartes sur verre dépoli) | c'est l'apparence utilisée aujourd'hui (`frontend.txt` = `cards`) |
 | Q3 Budget API | **moins de 5 € par mois**, plafond bloquant | plus prudent ; modifiable dans `config.ini` |
-| Q4 IP | PC 192.168.1.50 (Wi-Fi, peut changer) ; Switch : à lire au premier test | — |
+| Q4 IP | PC sur le Wi-Fi de la maison (adresse dans pc_agent.ini) ; Switch : à lire au premier test | — |
 | Q5 Taille | **option 3** : pas de voix espeak ni de musiques MP3 (seulement les petits sons), et réutiliser les apps déjà sur la SD (sphaira, NXToggle…) au lieu de les dupliquer | seule option compatible avec la limite de 60 Mo |
 | Q6 Installations | faites de jour ; **pas de tâche planifiée** tant que l'heure n'est pas choisie | une tâche planifiée est un réglage système, qui demande un accord explicite |
 
